@@ -1,14 +1,14 @@
 /*
-Ian Buitrago: Slip days used for this project: 1  Slip days used (total): 1
-Ervin Kalemi: Slip days used for this project: 1  Slip days used (total): 1
+Ian Buitrago: Slip days used for this project: 0  Slip days used (total): 0
+Amber Cooper: Slip days used for this project: 0  Slip days used (total): 0
 
 Pair programming log (> 80% paired)
-9/19 3-4a  Ian, 1 hr
-9/20 10-12p Ian, Ervin, 4 hrs
-9/21 12-3p Ian, Ervin, 6 hrs
-9/21 6-9p Ian, Ervin, 6 hrs
-9/21 5-6p Ervin, 1 hr
-9/22 6-8p Ian, Ervin, 4 hrs
+2/19 3-4a  Ian, 1 hr
+2/20 10-12p Ian, Amber, 4 hrs
+2/21 12-3p Ian, Amber, 6 hrs
+2/21 6-9p Ian, Amber, 6 hrs
+2/21 5-6p Amber, 1 hr
+2/22 6-8p Ian, Amber, 4 hrs
 
 Total time 22 hrs, 20 hrs of pair programing
 
@@ -27,26 +27,25 @@ Notes:
 run with commands:
 javac LowerBound.java
 java -ea LowerBound smaller.txt
-2 space indent (google standard)
 */
 
-//Ian driving now
-//swap every ~30 min
+// Ian driving now
+// swap every ~30 min
 import java.io.*; 
 
 public class LowerBound {
 	static final int ASCII = 255;
     
     public static void main(String[] args) throws Exception {
-  	//assertion
+  	// assertion
   	assert(args.length == 1);
     // Input file
     String file = args[0];
   	
-  	//IO object
+  	// IO object
   	char[] charArray = getCharacters(file);
   	
-  	//check occurence of each char
+  	// check occurence of each char
   	int[] occurence = new int[ASCII];
   	for(int i = 0; i < charArray.length; i++){
   		occurence[ (int)charArray[i] ]++;
@@ -55,10 +54,10 @@ public class LowerBound {
   	double e =  entropy(occurence, (double) charArray.length);  	
   	double lowBound =  lowerBound(e, charArray.length);
   	
-  	//Print the results
+  	// Print the results
   	System.out.println("The lower bound of "+file+" is " + lowBound + "; the entropy is " + e);
   }
-	//Ervin driving now 
+	// Amber driving now 
   static double entropy(int[] occurence, double size){
     double e = 0.0;
     // For every occurence, if any, calculate run the entropy formula

@@ -1,19 +1,19 @@
 /*
-Ian Buitrago: Slip days used for this project: 1  Slip days used (total): 1
-Ervin Kalemi: Slip days used for this project: 1  Slip days used (total): 1
+Ian Buitrago: Slip days used for this project: 0  Slip days used (total): 0
+Amber Cooper: Slip days used for this project: 0  Slip days used (total): 0
 
 Pair programming log (> 80% paired)
 9/19 3-4a  Ian, 1 hr
-9/20 10-12p Ian, Ervin, 4 hrs
-9/21 12-3p Ian, Ervin, 6 hrs
-9/21 6-9p Ian, Ervin, 6 hrs
-9/21 5-6p Ervin, 1 hr
-9/22 6-8p Ian, Ervin, 4 hrs
+9/20 10-12p Ian, Amber, 4 hrs
+9/21 12-3p Ian, Amber, 6 hrs
+9/21 6-9p Ian, Amber, 6 hrs
+9/21 5-6p Amber, 1 hr
+9/22 6-8p Ian, Amber, 4 hrs
 
 Total time 22 hrs, 20 hrs of pair programing
 
 Challenges: Converting the first argument from string to character
-(Ervin) Creating the trie data structure.
+(Amber) Creating the trie data structure.
 (Ian) Understanding the LZ algorithm 
 
 Learned: Encoding/ decoding
@@ -27,31 +27,29 @@ java -ea LZcoding d test.cpz
 
 To compare the files: 
 cmp test test.cpz.dcz
-
-2 space indent (google standard)
 */
 
 import java.util.HashMap;
 import java.util.ArrayList;
-//Ervin driving now
-//swap every ~30 min
+// Amber driving now
+// swap every ~30 min
 public class LZcoding {
 	
 	static final boolean DEBUG = false;
   public static void main(String[] args) throws Exception{
-  	//measure elapsed time
+  	// measure elapsed time
   	long start = System.currentTimeMillis();
   	
-  	//assertion
+  	// assertion
     assert(args.length == 2);
     assert(args[0].charAt(0) == 'c' || args[0].charAt(0) == 'd');
     assert(args[0].length() == 1);
   	
-  	//testing args[]
+  	// testing args[]
   	char type = args[0].charAt(0);
   	String file = args[1];
   	
-  	//Compress or decompress file based on the input
+  	// Compress or decompress file based on the input
   	if(type == 'c')
 	    compress(file);
     else if(type == 'd')
@@ -60,13 +58,13 @@ public class LZcoding {
     long elapsed = System.currentTimeMillis() - start;
     if(DEBUG) System.out.println("elapsed run time: "+ elapsed +"ms");
   }
-  //Ian driving now
+  // Ian driving now
   public static void compress(String file) throws Exception{
     // IO compressor on the file
     IO.Compressor compressor = new IO.Compressor(file);
     // Convert file to an array of characters
     char[] charArray = compressor.getCharacters();  
-    //initialize dictionary and root to contain null character, 
+    // initialize dictionary and root to contain null character, 
     // which represents <> empty string  
     final trieNode root = new trieNode(0, "");
     trie dict = new trie(root);
@@ -74,7 +72,7 @@ public class LZcoding {
     String lookup = "";
     int counter = 1;
     // For every character in the array of characters run encode
-    // Ervin driving now
+    // Amber driving now
     for (int i= 0; i < charArray.length; i++){
 			// Append the next character to the lookup string
 			lookup += charArray[i];
@@ -153,7 +151,7 @@ public class LZcoding {
 }
 // Ian driving
 
-//Trie class
+// Trie class
 class trie{
   private trieNode root;
   // Constructor
