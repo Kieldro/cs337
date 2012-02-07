@@ -35,69 +35,69 @@ import java.io.*;
 
 public class LowerBound {
 	static final int ASCII = 255;
-    
-    public static void main(String[] args) throws Exception {
-  	// assertion
-  	assert(args.length == 1);
-    // Input file
-    String file = args[0];
-  	
-  	// IO object
-  	char[] charArray = getCharacters(file);
-  	
-  	// check occurence of each char
-  	int[] occurence = new int[ASCII];
-  	for(int i = 0; i < charArray.length; i++){
-  		occurence[ (int)charArray[i] ]++;
+
+	public static void main(String[] args) throws Exception {
+		// assertion
+		assert(args.length == 1);
+		// Input file
+		String file = args[0];
+
+		// IO object
+		char[] charArray = getCharacters(file);
+
+		// check occurence of each char
+		int[] occurence = new int[ASCII];
+		for(int i = 0; i < charArray.length; i++){
+			occurence[ (int)charArray[i] ]++;
 		}
-  	// Calculate entropy and lower bound
-  	double e =  entropy(occurence, (double) charArray.length);  	
-  	double lowBound =  lowerBound(e, charArray.length);
-  	
-  	// Print the results
-  	System.out.println("The lower bound of "+file+" is " + lowBound + "; the entropy is " + e);
-  }
+		// Calculate entropy and lower bound
+		double e =  entropy(occurence, (double) charArray.length);  	
+		double lowBound =  lowerBound(e, charArray.length);
+
+		// Print the results
+		System.out.println("The lower bound of "+file+" is " + lowBound + "; the entropy is " + e);
+	}
 	// Amber driving now 
-  static double entropy(int[] occurence, double size){
-    double e = 0.0;
-    // For every occurence, if any, calculate run the entropy formula
-    for (int i=0; i<occurence.length; i++){
-    	if(occurence[i] != 0){
-    		e -= (occurence[i]/size) * (Math.log(occurence[i]/size)/Math.log(2));
-    	}
-    }
-    // Round the entropy to three decimals and return it
-    e = Math.round(e * 1000);
-  	return e / 1000;
-  }
-  
-  static double lowerBound(double e, int size ){
-    // Round the lower bound to three decimals and return it
-  	double lowerBound = Math.round(size * e * 1000);
-  	return lowerBound/1000;
-  }
-  
-  // Function copied from IO.file. 
-  // Copied so that when computing the lowerbound there won't be
-  // any empty encoded file created.
-  public static char[] getCharacters(String file) throws Exception {
-	  File inFile = new File(file);
-	  char[] ret = new char[(int) (inFile.length()+1)];
-	  int retCursor = 0; 
-	  FileInputStream from = new FileInputStream(inFile); 
-	
-	  while (true) {
-		  byte nextByte = (byte) from.read(); 
-		  if (nextByte == -1) 
-			  break;
-		
-		  char nextChar = (char) nextByte; 
-		  ret[retCursor++] = nextChar; 
-	  }
-	
-	  ret[(int)(inFile.length())] = '\000';
-	  return ret; 
-  }
+	static double entropy(int[] occurence, double size){
+		double e = 0.0;
+		// For every occurence, if any, calculate run the entropy formula
+		for (int i=0; i<occurence.length; i++){
+			if(occurence[i] != 0)
+				e -= (occurence[i]/size) * (Math.log(occurence[i]/size)/Math.log(2));
+
+		}
+		// Round the entropy to three decimals and return it
+		e = Math.round(e * 1000);
+		return e / 1000;
+	}
+
+	static double lowerBound(double e, int size ){
+		// Round the lower bound to three decimals and return it
+		double lowerBound = Math.round(size * e * 1000);
+		return lowerBound/1000;
+	}
+
+	// Function copied from IO.file. 
+	// Copied so that when computing the lowerbound there won't be
+	// any empty encoded file created.
+	public static char[] getCharacters(String file) throws Exception {
+		File inFile = new File(file);
+		char[] ret = new char[(int) (inFile.length()+1)];
+		int retCursor = 0; 
+		FileInputStream from = new FileInputStream(inFile); 
+
+		while (true) {
+			byte nextByte = (byte) from.read(); 
+			if (nextByte == -1) 
+			break;
+
+			char nextChar = (char) nextByte; 
+			ret[retCursor++] = nextChar; 
+		}
+
+		ret[(int)(inFile.length())] = '\000';
+		return ret; 
+	}
 }
 
 /* EX output
