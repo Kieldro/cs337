@@ -3,14 +3,11 @@ Ian Buitrago: Slip days used for this project: 0  Slip days used (total): 0
 Amber Cooper: Slip days used for this project: 0  Slip days used (total): 0
 
 Pair programming log (> 80% paired)
-9/19 3-4a  Ian, 1 hr
-9/20 10-12p Ian, Amber, 4 hrs
-9/21 12-3p Ian, Amber, 6 hrs
-9/21 6-9p Ian, Amber, 6 hrs
-9/21 5-6p Amber, 1 hr
-9/22 6-8p Ian, Amber, 4 hrs
+2/14 1a-4a  Ian, 3 hr
+2/15 7-10p Ian, Amber, 6 hrs
+2/16 4-10p Ian, Amber, 12 hrs
 
-Total time 22 hrs, 20 hrs of pair programing
+Total time 21 hrs, 18 hrs of pair programing
 
 Challenges: Converting the first argument from string to character
 (Amber) Creating the trie data structure.
