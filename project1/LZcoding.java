@@ -17,6 +17,7 @@ Learned: Encoding/ decoding
 More Java API
 
 Notes:
+java version "1.6.0_31"
 run with commands:
 javac LZcoding.java
 java -ea LZcoding c test
@@ -47,13 +48,16 @@ public class LZcoding {
 		String file = args[1];
 
 		// Compress or decompress file based on the input
-		if(type == 'c')
+		if(type == 'c'){
+			if(DEBUG) System.out.println("Compresssing file: " + file + " ...");
 			compress(file);
-		else if(type == 'd')
+		}else if(type == 'd'){
+			if(DEBUG) System.out.println("Decompresssing file: " + file + " ...");
 			decompress(file);
+		}
 		// Comparing time of execution
 		long elapsed = System.currentTimeMillis() - start;
-		if(DEBUG) System.out.println("elapsed run time: "+ elapsed +"ms");
+		if(DEBUG) System.out.println("elapsed run time: " + elapsed + "ms");
 	}
 	
 	// Ian driving now
@@ -61,47 +65,49 @@ public class LZcoding {
 		// IO compressor on the file
 		IO.Compressor compressor = new IO.Compressor(file);
 		// Convert file to an array of characters
-		char[] charArray = compressor.getCharacters();  
-		// initialize dictionary and root to contain null character, 
-		// which represents <> empty string  
-		final trieNode root = new trieNode(0, "");
+		char[] charArray = compressor.getCharacters();
+		if(DEBUG) System.out.println("charArray = " + String.valueOf(charArray) );
+		// initialize dictionary with root / <> empty string
+		int idx = 0;
+		final trieNode root = new trieNode(idx, "");
 		trie dict = new trie(root);
-		// Initial null string to lookup in the file
+		++idx;
+		// Initial empty string to lookup in the file
 		String lookup = "";
-		int counter = 1;
-		// For every character in the array of characters run encode
+		// For every character in the array of characters, run encode
 		// Amber driving now
-		for (int i= 0; i < charArray.length; i++){
+		for (int i = 0; i < charArray.length; ++i){
 			// Append the next character to the lookup string
 			lookup += charArray[i];
+			if(DEBUG) System.out.println("lookup = " + lookup);
 			trieNode parent = dict.contains(lookup);
+			if(DEBUG) System.out.println("parent = " + parent);
+			
 			// If the new string formed is not in the dictionary
 			// and if the string is just a character
 			if(parent == null && lookup.length() == 1){
 				// Create a transmission node based on the counter and that character
 				// Add that node to the dictionary trie
-				root.add(counter, lookup);
+				root.add(idx, lookup);
 				// Run encode on that character with index 0
 				compressor.encode(0, charArray[i]);
-				// Re-initialize the lookup string and increment counter
-				lookup = "";
-				counter++;
-			} // Else the new string is not a character, so we have to find it's parent
+			}
+			// Else the new string is not a character, so we have to find it's parent
 			else{
 				// Get the previous word from the lookup string
 				String previousWord = lookup.substring(0, lookup.length()-1);
 				// Get the index of the parent node in the transmission
-					if(DEBUG) System.out.println("parent = " + parent );
 				int index = parent.getIndex();
 				// Create a new TrieNode based on the counter and the new string 
 				// and add it to the dictionary.
-				parent.add(counter, lookup);
-				// Run incode on the last character of the lookup string
+				parent.add(idx, lookup);
+				// Run encode on the last character of the lookup string
 				compressor.encode(index, lookup.charAt(lookup.length()-1));
-				// Re-initialize the lookup string and increment counter
-				lookup = "";
-				counter++;
 			}
+			
+			// Re-initialize the lookup string and increment counter
+			lookup = "";
+			++idx;
 		}
 	// Finalize compressor
 	compressor.finalize();
@@ -141,7 +147,7 @@ public class LZcoding {
 			// Get the next pair
 			next = io.decode();      
 		}
-		// Finalize dhe decompressor
+		// Finalize the decompressor
 		io.finalize();
 	}
 }
@@ -155,7 +161,7 @@ class trie{
 		root = node;
 	}
 	// If the dictionary contains the word
-	// return that node, else return null
+	// return that node's parent, else return null
 	public trieNode contains (String s){
 		return contains(s, root);
 	}
@@ -202,6 +208,6 @@ class trieNode{
 	}
 	// Print the node
 	public String toString (){		//for debugging
-		return "(" + idx + ", " + word + ")";
+		return "(" + idx + ", \"" + word + "\")";
 	}
 }

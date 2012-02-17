@@ -1,12 +1,19 @@
+#file variables
+file="test"
+
+# compile
 #javac *.java
 javac LZcoding.java
-javac LowerBound.java
-javac IO.java
-java -ea LowerBound larger.txt
-java -ea LowerBound smaller.txt
-java -ea LZcoding c larger.txt
-java -ea LZcoding c smaller.txt
-java -ea LZcoding d smaller.txt.cpz
-java -ea LZcoding d larger.txt.cpz
-cmp -l larger.txt larger.txt.cpz.dcz
-cmp -l smaller.txt smaller.txt.cpz.dcz
+#javac LowerBound.java
+#javac IO.java
+
+java -ea LZcoding c $file
+java -ea LZcoding d $file".cpz"
+#java -ea LowerBound larger.txt
+#java -ea LowerBound smaller.txt
+#java -ea LZcoding c larger.txt
+#java -ea LZcoding c smaller.txt
+#java -ea LZcoding d smaller.txt.cpz
+#java -ea LZcoding d larger.txt.cpz
+#cmp -l larger.txt larger.txt.cpz.dcz
+#cmp -l smaller.txt smaller.txt.cpz.dcz

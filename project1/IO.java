@@ -21,7 +21,7 @@ public class IO {
 		}
 		
 		Pair(int index, char character, boolean _v) {
-			assert (((int)character) < BLOCK_SIZE);
+			assert (((int)character) < BLOCK_SIZE) :  "CHAR: " + character;
 			
 			this.index = index; 
 			this.character = character; 
