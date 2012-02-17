@@ -1,6 +1,6 @@
 NAMES: Ian Buitrago, Amber Cooper
-UT EIDS: ib, 
-SECTIONS: 
+UT EIDS: ib, alc959
+SECTIONS: 52945 52973
 CODING STATUS: Everything works;
 
 *Explanation on why the compression fails on the larger.txt*
