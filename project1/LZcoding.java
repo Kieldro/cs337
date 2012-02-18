@@ -39,7 +39,7 @@ public class LZcoding {
 		// measure elapsed time
 		long start = System.currentTimeMillis();
 
-		// assertion
+		// assertions
 		assert(args.length == 2);
 		assert(args[0].charAt(0) == 'c' || args[0].charAt(0) == 'd');
 		assert(args[0].length() == 1);
@@ -63,15 +63,14 @@ public class LZcoding {
 	
 	// Ian driving now
 	public static void compress(String file) throws Exception{
-		IO.Compressor compressor = new IO.Compressor(file);
-		char[] charArray = compressor.getCharacters();		// Convert file to an array of characters
-		if(Global.DEBUG) System.out.println("charArray = " + String.valueOf(charArray) );
+		IO.Compressor io = new IO.Compressor(file);
+		char[] charArray = io.getCharacters();		// Convert file to an array of characters
+		//if(Global.DEBUG) System.out.println("charArray = " + String.valueOf(charArray) );
 		// initialize dictionary with root (0, <>)
 		int idx = 0;
 		final trieNode root = new trieNode(idx, "");
 		trie dict = new trie(root);
 		++idx;
-		trieNode currentNode = root;
 		trieNode parent = root;
 		// Initial empty string to lookup in the file
 		String lookup = "";
@@ -86,7 +85,7 @@ public class LZcoding {
 				// add to the trie dictionary under the proper parent node
 				parent.add(idx, lookup);
 				// Run encode on the pair
-				compressor.encode(parent.getIndex(), charArray[i] );
+				io.encode(parent.getIndex(), charArray[i] );
 				if(Global.DEBUG)System.out.printf("encode pair: (%d, \'%c\')\n",
 					parent.getIndex(), charArray[i]);
 				lookup = "";
@@ -95,45 +94,67 @@ public class LZcoding {
 				continue;		// continue building lookup string
 		}
 		
-		compressor.finalize();
+		io.finalize();
 	}
 
 	public static void decompress(String file) throws Exception{
-		// Initialize decompressor and the arrayList that will serve
-		// as the dictionary.
 		IO.Decompressor io = new IO.Decompressor(file);
+		// initialize dictionary with root (0, <>)
+		int idx = 0;
+		final trieNode root = new trieNode(idx, "");
+		trie dict = new trie(root);
+		++idx;
+		
+		for (IO.Pair pair = io.decode(); pair.isValid(); pair = io.decode() ){
+			String word = dict.search( pair.getIndex() );
+			char c = pair.getCharacter();
+			String newEntry = word + c;
+			
+			io.append(newEntry);
+			
+			// add new entry to dictionary
+			trieNode parent = dict.findParent(newEntry);
+			if(Global.DEBUG) System.out.println("parent = " + parent);
+			parent.add(idx, newEntry);
+			++idx;
+		}
+		
+		io.finalize();
+		
+		
+		/*
+		IO.Pair pair = io.decode();
 		ArrayList<String> dictionary = new ArrayList<String>();
-		dictionary.add("Foo String, since dictionary[0] will never be user");
-
-		// Get the first pair and start the counter
-		IO.Pair next = io.decode();
+		dictionary.add("Foo String, since dictionary[0] will never be used");
 		int counter = 1;
+		
 		// While that pair is valid
-		while (next.isValid()){
+		while ( pair.isValid() ){
 			// If the index is zero
-			if(next.getIndex() == 0){
+			if(pair.getIndex() == 0){
 				// That character is added to the dictionary
-				String newEntry = Character.toString(next.getCharacter());
+				String newEntry = Character.toString( pair.getCharacter() );
 				dictionary.add(newEntry);
 				// Write the new string to file
 				io.append(newEntry);
 				counter++;
 			}
-			// Else the index > 0, which means that that character is already in the dictionary
+			// Else the pair > 0, which means that that character is already in the dictionary
 			else {
 				// The new string is the string that is at dictionary[index] + the new character from the pair
 				// Add the new enry to the dictionary
-				String newEntry = dictionary.get(next.getIndex() ) + Character.toString(next.getCharacter());
+				String newEntry = dictionary.get( pair.getIndex() ) + Character.toString( pair.getCharacter() );
 				dictionary.add(newEntry);
 				// Write the new string to file 
 				io.append(newEntry);
 				counter++;
 			}
 			// Get the next pair
-			next = io.decode();      
+			pair = io.decode();      
 		}
-		// Finalize the decompressor
 		io.finalize();
+		*/
+		
 	}
 }
 // Ian driving
@@ -164,6 +185,28 @@ class trie{
 		// Recursive case
 		return findParent(path.substring(1) , node.branch.get(target) );
 	}
+	
+	// searches the trie by index and returns the corresponding word
+	public String search (int idx){
+		return search(root, idx);
+	}
+	
+	public String search (trieNode node, int idx){
+		if (idx == node.getIndex() )
+			return node.getWord();
+		
+		HashMap<Character, trieNode> branch = node.getBranch();
+		if(node.branch.size() == 0)
+			return null;
+		
+		for(trieNode child : branch.values() ){
+			String result = search(child, idx);
+			if (result != null)
+				return result;
+		}
+		
+		return null;		// all branches returned null
+	}
 }
 // The trieNode holds the word and the index of that word in the dictionary
 // and a HashMap of links and children trieNodes
@@ -188,13 +231,21 @@ class trieNode{
 		return child;
 	}
 	
+	// Accessors
+	public HashMap<Character, trieNode> getBranch(){
+		return this.branch;
+	}
+	
 	public boolean contains(char target){
 		return this.branch.containsKey(target);
 	}
 	
-	// Index accessor
 	public int getIndex(){
 		return idx;
+	}
+	
+	public String getWord(){
+		return word;
 	}
 	// Print the node
 	public String toString (){		//for debugging

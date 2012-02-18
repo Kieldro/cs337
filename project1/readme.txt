@@ -2,6 +2,10 @@ NAMES: Ian Buitrago, Amber Cooper
 UT EIDS: ib, alc959
 SECTIONS: 52945 52973
 CODING STATUS: Everything works;
+NOTE ON PERFORMANCE: Decompress if implemented with the trie structure dictionary
+as explicitly stated in the project requirements, but the runtime is far slower
+than if the decompression dictionary data structure is an Arraylist. I've left the
+Arraylist implementation commented out.
 
 *Explanation on why the compression fails on the larger.txt*
 

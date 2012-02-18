@@ -10,18 +10,18 @@ javac LZcoding.java
 # EXECUTE
 java -ea LZcoding c $file
 java -ea LZcoding d $file".cpz"
+cmp -l $file $file".cpz.dcz"
 
 #java -ea LowerBound larger.txt
 #java -ea LowerBound smaller.txt
 
-java -ea LZcoding c larger.txt
-java -ea LZcoding d larger.txt.cpz
+#java -ea LZcoding c larger.txt
+#java -ea LZcoding d larger.txt.cpz
 
-java -ea LZcoding c smaller.txt
-java -ea LZcoding d smaller.txt.cpz
+#java -ea LZcoding c smaller.txt
+#java -ea LZcoding d smaller.txt.cpz
 
 # COMPARE
-#cmp -l $file $file".cpz.dcz"
 #cmp -l larger.txt larger.txt.cpz.dcz
 #cmp -l smaller.txt smaller.txt.cpz.dcz
 
