@@ -1,6 +1,6 @@
 /*
-Ian Buitrago: Slip days used for this project: 0  Slip days used (total): 0
-Amber Cooper: Slip days used for this project: 0  Slip days used (total): 0
+Ian Buitrago: Slip days used for this project: 1  Slip days used (total): 1
+Amber Cooper: Slip days used for this project: 1  Slip days used (total): 1
 
 Pair programming log (> 80% paired)
 2/14 1a-4a  Ian, 3 hr

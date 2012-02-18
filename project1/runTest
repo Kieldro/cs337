@@ -1,19 +1,28 @@
-#file variables
+# SCRIPT VARIABLES
 file="test"
 
-# compile
+# COMPILE
 #javac *.java
 javac LZcoding.java
 #javac LowerBound.java
 #javac IO.java
 
+# EXECUTE
 java -ea LZcoding c $file
 java -ea LZcoding d $file".cpz"
+
 #java -ea LowerBound larger.txt
 #java -ea LowerBound smaller.txt
-#java -ea LZcoding c larger.txt
-#java -ea LZcoding c smaller.txt
-#java -ea LZcoding d smaller.txt.cpz
-#java -ea LZcoding d larger.txt.cpz
+
+java -ea LZcoding c larger.txt
+java -ea LZcoding d larger.txt.cpz
+
+java -ea LZcoding c smaller.txt
+java -ea LZcoding d smaller.txt.cpz
+
+# COMPARE
+#cmp -l $file $file".cpz.dcz"
 #cmp -l larger.txt larger.txt.cpz.dcz
 #cmp -l smaller.txt smaller.txt.cpz.dcz
+
+#turnin --submit yichao project1 emails.txt readme.txt LowerBound.java LZcoding.java smaller.txt larger.txt

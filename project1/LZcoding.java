@@ -27,13 +27,14 @@ To compare the files:
 cmp test test.cpz.dcz
 */
 
-import java.util.HashMap;
+import java.util.HashMap;		// for branch data struture
 import java.util.ArrayList;
 // Amber driving now
 // swap every ~30 min
-public class LZcoding {
-	
+class Global{	// for global variables
 	static final boolean DEBUG = false;
+}
+public class LZcoding {
 	public static void main(String[] args) throws Exception{
 		// measure elapsed time
 		long start = System.currentTimeMillis();
@@ -49,68 +50,52 @@ public class LZcoding {
 
 		// Compress or decompress file based on the input
 		if(type == 'c'){
-			if(DEBUG) System.out.println("Compresssing file: " + file + " ...");
+			if(Global.DEBUG) System.out.println("Compresssing file: " + file + " ...");
 			compress(file);
 		}else if(type == 'd'){
-			if(DEBUG) System.out.println("Decompresssing file: " + file + " ...");
+			if(Global.DEBUG) System.out.println("Decompresssing file: " + file + " ...");
 			decompress(file);
 		}
 		// Comparing time of execution
 		long elapsed = System.currentTimeMillis() - start;
-		if(DEBUG) System.out.println("elapsed run time: " + elapsed + "ms");
+		if(Global.DEBUG) System.out.println("elapsed run time: " + elapsed + "ms");
 	}
 	
 	// Ian driving now
 	public static void compress(String file) throws Exception{
-		// IO compressor on the file
 		IO.Compressor compressor = new IO.Compressor(file);
-		// Convert file to an array of characters
-		char[] charArray = compressor.getCharacters();
-		if(DEBUG) System.out.println("charArray = " + String.valueOf(charArray) );
-		// initialize dictionary with root / <> empty string
+		char[] charArray = compressor.getCharacters();		// Convert file to an array of characters
+		if(Global.DEBUG) System.out.println("charArray = " + String.valueOf(charArray) );
+		// initialize dictionary with root (0, <>)
 		int idx = 0;
 		final trieNode root = new trieNode(idx, "");
 		trie dict = new trie(root);
 		++idx;
+		trieNode currentNode = root;
+		trieNode parent = root;
 		// Initial empty string to lookup in the file
 		String lookup = "";
-		// For every character in the array of characters, run encode
-		// Amber driving now
-		for (int i = 0; i < charArray.length; ++i){
-			// Append the next character to the lookup string
+		
+		
+		for(int i = 0; i < charArray.length; ++i){
 			lookup += charArray[i];
-			if(DEBUG) System.out.println("lookup = " + lookup);
-			trieNode parent = dict.contains(lookup);
-			if(DEBUG) System.out.println("parent = " + parent);
+			if(Global.DEBUG) System.out.println("lookup = " + lookup);
+			parent = dict.findParent(lookup);
 			
-			// If the new string formed is not in the dictionary
-			// and if the string is just a character
-			if(parent == null && lookup.length() == 1){
-				// Create a transmission node based on the counter and that character
-				// Add that node to the dictionary trie
-				root.add(idx, lookup);
-				// Run encode on that character with index 0
-				compressor.encode(0, charArray[i]);
-			}
-			// Else the new string is not a character, so we have to find it's parent
-			else{
-				// Get the previous word from the lookup string
-				String previousWord = lookup.substring(0, lookup.length()-1);
-				// Get the index of the parent node in the transmission
-				int index = parent.getIndex();
-				// Create a new TrieNode based on the counter and the new string 
-				// and add it to the dictionary.
+			if( !parent.contains(charArray[i]) ){	// lookup not in trie
+				// add to the trie dictionary under the proper parent node
 				parent.add(idx, lookup);
-				// Run encode on the last character of the lookup string
-				compressor.encode(index, lookup.charAt(lookup.length()-1));
-			}
-			
-			// Re-initialize the lookup string and increment counter
-			lookup = "";
-			++idx;
+				// Run encode on the pair
+				compressor.encode(parent.getIndex(), charArray[i] );
+				if(Global.DEBUG)System.out.printf("encode pair: (%d, \'%c\')\n",
+					parent.getIndex(), charArray[i]);
+				lookup = "";
+				++idx;
+			}else		// lookup already in trie
+				continue;		// continue building lookup string
 		}
-	// Finalize compressor
-	compressor.finalize();
+		
+		compressor.finalize();
 	}
 
 	public static void decompress(String file) throws Exception{
@@ -138,9 +123,9 @@ public class LZcoding {
 			else {
 				// The new string is the string that is at dictionary[index] + the new character from the pair
 				// Add the new enry to the dictionary
-				String newEntry = dictionary.get(next.getIndex()) + Character.toString(next.getCharacter());
+				String newEntry = dictionary.get(next.getIndex() ) + Character.toString(next.getCharacter());
 				dictionary.add(newEntry);
-				// Writte the new string to file 
+				// Write the new string to file 
 				io.append(newEntry);
 				counter++;
 			}
@@ -160,25 +145,24 @@ class trie{
 	public trie(trieNode node){
 		root = node;
 	}
-	// If the dictionary contains the word
-	// return that node's parent, else return null
-	public trieNode contains (String s){
-		return contains(s, root);
+	// Returns the parent or future parent of the node
+	public trieNode findParent (String lookup){
+		return findParent(lookup, root);
 	}
 	// Recursive helper method to search the trie
-	public trieNode contains (String s, trieNode node){
-		char target = s.charAt(0);
+	public trieNode findParent (String path, trieNode node){
+		char target = path.charAt(0);
+		
 		// Base cases
-		if(node.branch.containsKey( target) && s.length() == 1)
-			return node;
-
 		if(node.branch.size() == 0)
-			return null;
+			return node;		// node is a leaf
+		if( !node.branch.containsKey(target) )
+			return node;		// target node is not yet a child of this node
+		if(path.length() == 1)
+			return node;		// node is the parent of the target node
+		
 		// Recursive case
-		if( node.branch.containsKey(target) )
-			return contains(s.substring(1) , node.branch.get(target));
-
-		return null;
+		return findParent(path.substring(1) , node.branch.get(target) );
 	}
 }
 // The trieNode holds the word and the index of that word in the dictionary
@@ -198,16 +182,22 @@ class trieNode{
 	public trieNode add (int i, String s){
 		trieNode child = new trieNode(i, s);
 		Character c = new Character(s.charAt(s.length()-1));
-		branch.put(c, child); 
+		branch.put(c, child);
+		if(Global.DEBUG) System.out.println("add node: " + child);
 
 		return child;
 	}
+	
+	public boolean contains(char target){
+		return this.branch.containsKey(target);
+	}
+	
 	// Index accessor
 	public int getIndex(){
 		return idx;
 	}
 	// Print the node
 	public String toString (){		//for debugging
-		return "(" + idx + ", \"" + word + "\")";
+		return "{" + idx + " : \"" + word + "\"}";
 	}
 }
