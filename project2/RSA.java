@@ -41,9 +41,10 @@ or with
 
 import java.util.*;
 import java.io.*;
-//Ian driving now
+
+// Ian driving now
 public class RSA{
-	static final boolean DEBUG = false;
+	static final boolean DEBUG = true;
 	
 	public static void main(String[] args) throws Exception
 	{
@@ -58,22 +59,20 @@ public class RSA{
 			 if(DEBUG) System.out.println("p: " + p);
 			 if(DEBUG) System.out.println("q: " + q);
 			 generateKey(p, q);
-		
 		}else if (arg.equals("encrypt") ){
 			File inFile = new File(args[1]);
 			File key = new File(args[2]);
 			File outFile = new File(args[3]);
 			encrypt(inFile, key, outFile);
-	
 		}else if (arg.equals("decrypt") ){
 			File inFile = new File(args[1]);
 			File key = new File(args[2]);
 			File outFile = new File(args[3]);
 			decrypt(inFile, key, outFile);
-		}else{
+		}else
 			System.out.println("Invalid argument \"" + arg + '"');
-		}
 	}
+	
 	//Partner driving now
 	static void generateKey(long p, long q){
 		long n = 0;
@@ -81,20 +80,19 @@ public class RSA{
 		long d = 0;
 		long phi = (p-1)*(q-1);
 
-		//calculate n
+		// calculate n
 		n = p * q;
-		System.out.println("n"+n);
-		System.out.println("phi"+phi);
+		if(DEBUG) System.out.println("n: " + n);
+		if(DEBUG) System.out.println("phi: " + phi);
 		
-		//choose e st 1<e<n and e and phi are relatively prime.
-		if((phi % 17) != 0){
+		// choose e st 1<e<n and e and phi are relatively prime.
+		if( (phi % 17) != 0){
 			e = 17;
-		}else if((phi % 3) != 0){
+		}else if( (phi % 3) != 0){
 			e = 3;
-		}else{	
-			System.out.println("hi");
+		}else{
 			for(long i = 2; i < phi; i++){
-				System.out.print("*"+i);
+				if(DEBUG) System.out.print("*"+i);
 				if(isPrime(i) ){
 					if((phi % i) != 0){
 						e = i;
@@ -103,10 +101,10 @@ public class RSA{
 			}
 		}
 
-		//calculate d
+		// calculate d
 		d = gcd(phi,e);
 		
-		//correction if d is negative
+		// correction if d is negative
 		while(d < 0){			
 			for(long i = (e+2); i < phi; i++){
 				if(isPrime(i)){
@@ -120,12 +118,12 @@ public class RSA{
 			d = gcd(phi,e);
 		}		
 		
-		//output n, e, and d
+		// output n, e, and d
 		System.out.println(n + " " + e + " " + d);
 	}
 	
 	static boolean isPrime(long n){
-		//base cases / common cases
+		// base cases / common cases
 		if (n == 2) 
 			return true;
 		if (n == 3)
@@ -135,13 +133,13 @@ public class RSA{
 		if ((n % 3) == 0)
 			return false;
 		
-		//Ian driving now
-		//checks if a number is prime by checking if it has any factors besides
-		//itself and 1.
+		// Ian driving now
+		// checks if a number is prime by checking if it has any factors besides
+		// itself and 1.
 		long i = 5;
 		long w = 2;
 		while (i * i <= n){
-			if ((n % i) == 0){
+			if ( (n % i) == 0){
 				return false;
 			}
 			i += w;
@@ -157,8 +155,8 @@ public class RSA{
 		long d = 1;
 		long q;
 
-		//Partner driving now
-		//using the GCD algorithm from the notes.		
+		// Partner driving now
+		// using the GCD algorithm	
 		
 		while (v != 0){
 			q = (int)u/v;
@@ -175,7 +173,7 @@ public class RSA{
 		return t;
 	}
 	
-	//Encrypts input using the key (n, e, d) and writes it to the output file
+	// Encrypts input using the key (n, e, d) and writes it to the output file
 	static void encrypt(File inFile, File key, File outFile) throws Exception
 	{
 		DataInputStream in = new DataInputStream( new FileInputStream(inFile) );
@@ -183,10 +181,10 @@ public class RSA{
 		
 		long fileSize = inFile.length();
 		if(DEBUG) System.out.println("fileSize: " + fileSize + " bytes");
-		long total = 0;		//total number of bytes read
-		int s = 0;		//shift multiplier
+		long total = 0;		// total number of bytes read
+		int s = 0;		// shift multiplier
 		
-		//Ian driving now
+		// Ian driving now
 		Scanner sc = new Scanner(key);
 		long n = sc.nextLong();
 		long e = sc.nextLong();
@@ -198,21 +196,21 @@ public class RSA{
 		assert (n > Math.pow(2,24)): "n must be big enough to encrypt 3 bytes";
 		
 		try{
-			while(true){		//run till end of file
+			while(true){		// run till end of file
 				byte b = 0;
-				long M = 0;		//8 bytes long
-				long mask = 0x00FF;		//mask out last byte in long 
+				long M = 0;		// 8 bytes long
+				long mask = 0x00FF;		// mask out last byte in long 
 				
 				for(s = 2; s >= 0; s--, total++){		//read in 3 bytes
 					if (total == fileSize){
 						if(DEBUG) System.out.println("last byte read.");
-						break;	//break for loop to encrypt M
+						break;	// break for loop to encrypt M
 					}
 					long t = 0;
 					b = in.readByte();
 					if(DEBUG) System.out.println(String.format(" in.readByte   = 0x%1$X, %1$d", b));
-					t = b;		//implicit cast to long (possible sign extend if MSB is 1)
-					t &= mask;		//eliminates sign extention
+					t = b;		// implicit cast to long (possible sign extend if MSB is 1)
+					t &= mask;		// eliminates sign extention
 					t <<= 8 * s;
 					M |= t;		// or byte into M
 				}
@@ -224,7 +222,7 @@ public class RSA{
 					"Encrypted number(long Mprime) " + String.format("0x%1$X", Mprime)
 					+ " requires more than 4 bytes(byte concatenation error)";
 				
-				out.writeInt( (int)Mprime );		//write the 4 lower bytes as int
+				out.writeInt( (int)Mprime );		// write the 4 lower bytes as int
 				
 				if (total == fileSize){
 					throw new EOFException("File read successfully.");
@@ -249,7 +247,7 @@ public class RSA{
 	    long y = M;	
 	    long Mprime;
 	    
-	    //uses the Modular Exponentiation algorithm.
+	    // uses the Modular Exponentiation algorithm.
 	    while (e > 0){
 		  if (e % 2 == 1){
 			  x= (x*y) % n;
@@ -262,9 +260,9 @@ public class RSA{
 	    return Mprime;
 	}
 	
-	//Decrypt input using the d and n. Print it in the output file
+	// Decrypt input using the d and n. Print it in the output file
 	static void decrypt(File inFile, File key, File outFile) throws Exception{
-		//Partner driving now
+		// Partner driving now
 		DataInputStream in = new DataInputStream( new FileInputStream(inFile) );
 		DataOutputStream out = new DataOutputStream( new FileOutputStream(outFile) );
 		long fileSize = inFile.length();
