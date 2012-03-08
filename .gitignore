@@ -1,6 +1,4 @@
 # This file will prevent temp files from apearing to git
-*.dcz
-*.cpz
 *#
 *~
 *.class
@@ -9,4 +7,11 @@
 *.o
 *.swp
 *.exe
+a.out
+
+# repo specific
+*.dcz
+*.cpz
 *.pdf
+RSA
+
