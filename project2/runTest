@@ -1,12 +1,12 @@
 
 # file variables
 original="original"
-decrypted=riginal".dec"
 encrypted=original".enc"
+decrypted=riginal".dec"
 key="key"
 
 javac RSA.java
-java -ea RSA key 47 59 > $key
+java -ea RSA key 4513 5101 > $key
 
 # test encrypt and decrypt
 java -ea RSA encrypt $original $key $encrypted

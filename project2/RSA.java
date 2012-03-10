@@ -21,15 +21,18 @@ public class RSA{
 	final static boolean DEBUG = true;
 	public static void main(String[] args) throws Exception{
 		String arg = args[0];
+		
 		if (arg.equals("key") ){
 			long p = Long.valueOf(args[1]);
 			long q = Long.valueOf(args[2]);
 			genKey(p, q);
+			
 		}else if (arg.equals("encrypt") ){
 			File inputFile = new File(args[1]);
 			File keyFile = new File(args[2]);
 			File outputFile = new File(args[3]);
 			encrypt(inputFile, keyFile, outputFile);
+			
 		}else
 			System.out.println("Invalid arguement: " + arg);
 		
@@ -41,6 +44,7 @@ public class RSA{
 		long n = 0;
 		long e = 0;
 		long d = 0;
+		long m = 0;		// message block
 		
 		Scanner sc = new Scanner(keyFile);
 		n = sc.nextLong();
@@ -48,14 +52,16 @@ public class RSA{
 		d = sc.nextLong();
 		if (DEBUG) System.out.println("n, e, d");
 		if (DEBUG) System.out.println(n + " " + e + " " + d);
+		assert(n > Math.pow(2, 24) ): "n must be greater than 2^24.";
+		assert(n < Math.pow(2, 30) ): "n must be less than 2^30.";
 		
 		DataInputStream in = new DataInputStream(new FileInputStream(inputFile) );
 		DataOutputStream out = new DataOutputStream(new FileOutputStream(outputFile) );
-		try{while(true){
-		
+		try{while(in.available() > 0){
+			
 			// concatenate 3 bytes into a long
-			long m = 0;		// message block
-			for(int i = 2; i >= 0; --i){
+			m = 0;
+			for(int i = 2; i >= 0 && in.available() > 0; --i){
 				long inByte = in.readByte();
 				// debug output in hex and dec
 				if(DEBUG) System.out.println(String.format(" inByte = 0x%1$X, %1$d", inByte) );
