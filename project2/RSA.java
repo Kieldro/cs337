@@ -38,9 +38,14 @@ public class RSA{
 		}
 		
 		long n = p * q;
-		long e = 17;
 		long phi = (p-1)*(q-1);
-		long[] solution = gcd(e, phi);
+		System.out.println(phi);
+		long x = 3;
+		long e = calce(phi, n);
+		if(e < 2){
+			System.out.println("***ERROR*** Could not calculate e");
+			return;}
+		long[] solution = euclid(e, phi);
 		long d = solution[1];
 
 		
@@ -49,12 +54,25 @@ public class RSA{
 		System.out.println(" " + n + " " + e + " " + d);
 	}
 
-	public static long[] gcd(long p, long q){
+	public static long gcd(long y, long z){
+		if(z == 0) return y;
+		return gcd(z, y % z);
+	}
+
+	public static long[] euclid(long p, long q){
 		if(q == 0) return new long[]{p, 1, 0};
-		long[] sol = gcd(q, p % q);
+		long[] sol = euclid(q, p % q);
 		return new long[] {sol[0], sol[2], sol[1] - ((p / q) * sol[2])};
 		
 		
+	}
+
+	public static long calce(long phi, long n){
+		for(long x = 3; x < n; x+=2){
+			if(gcd(phi, x) == 1) return x;		
+		}
+		return 0;
+
 	}
 	
 	public static boolean isPrime(long x){
