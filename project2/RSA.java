@@ -38,14 +38,24 @@ public class RSA{
 		}
 		
 		long n = p * q;
-		long e = 17;		// ok to use small prime?
-		long d = 0;
+		long e = 17;
 		long phi = (p-1)*(q-1);
+		long[] solution = gcd(e, phi);
+		long d = solution[1];
+
 		
 		d = (1/e) % phi;
 		
 		if (DEBUG) System.out.println("n, e, d");
 		System.out.println(" " + n + " " + e + " " + d);
+	}
+
+	public static long[] gcd(long p, long q){
+		if(q == 0) return new long[]{p, 1, 0};
+		long[] sol = gcd(q, p % q);
+		return new long[] {sol[0], sol[2], sol[1] - ((p / q) * sol[2])};
+		
+		
 	}
 	
 	public static boolean isPrime(long x){
