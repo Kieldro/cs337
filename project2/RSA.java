@@ -52,13 +52,26 @@ public class RSA{
 		
 		DataInputStream in = new DataInputStream(new FileInputStream(inputFile) );
 		DataOutputStream out = new DataOutputStream(new FileOutputStream(outputFile) );
+		try{while(true){
 		
-		for(int i = 0; i < 3; ++i){
-			byte b = in.readByte();
-			// debug output in hex
-			if(DEBUG) System.out.println(String.format("in.readByte() = 0x%1$X, %1$d", b) );
+			// concatenate 3 bytes into a long
+			long m = 0;
+			for(int i = 2; i >= 0; --i){
+				long inByte = in.readByte();
+				// debug output in hex
+				if(DEBUG) System.out.println(String.format("in.readByte() = 0x%1$X, %1$d", inByte) );
+				m = (inByte << i*8) | m ;
 			
+			}
+			if(DEBUG) System.out.println(String.format("block = 0x%1$X, %1$d", m) );
+		
+			long c = exponentiation(m, e, n);
+		
+			out.writeInt( (int)c );
+		}}catch (Exception ex){
+			if(DEBUG) System.out.println("End of file." );
 		}
+		
 		
 		
 	}
