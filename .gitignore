@@ -12,6 +12,7 @@ a.out
 # repo specific
 *.dcz
 *.cpz
+*.enc
 *.pdf
 RSA
 

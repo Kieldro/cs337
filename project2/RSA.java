@@ -69,7 +69,7 @@ public class RSA{
 		
 			out.writeInt( (int)c );
 		}}catch (Exception ex){
-			if(DEBUG) System.out.println("End of file." );
+			if(DEBUG) System.out.println("End of file.");
 		}
 		
 		
@@ -88,7 +88,9 @@ public class RSA{
 			return;}
 		long[] solution = euclid(e, phi);
 		long d = solution[1];
-
+		
+		while(d < 0) d+= phi;
+		
 		System.out.println(n + " " + e + " " + d);
 	}
 
