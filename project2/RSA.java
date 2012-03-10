@@ -38,10 +38,11 @@ public class RSA{
 		}
 		
 		long n = p * q;
-		long e = 3;
+		long e = 17;		// ok to use small prime?
 		long d = 0;
 		long phi = (p-1)*(q-1);
 		
+		d = (1/e) % phi;
 		
 		if (DEBUG) System.out.println("n, e, d");
 		System.out.println(" " + n + " " + e + " " + d);
