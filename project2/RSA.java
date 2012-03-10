@@ -49,7 +49,6 @@ public class RSA{
 		long d = solution[1];
 
 		
-		d = (1/e) % phi;
 		
 		if (DEBUG) System.out.println("n, e, d");
 		System.out.println(" " + n + " " + e + " " + d);
