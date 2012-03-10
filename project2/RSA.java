@@ -26,7 +26,7 @@ public class RSA{
 			long p = Long.valueOf(args[1]);
 			long q = Long.valueOf(args[2]);
 			genKey(p, q);
-		}if (arg.equals("encrypt") ){
+		}else if (arg.equals("encrypt") ){
 			File inputFile = new File(args[1]);
 			File keyFile = new File(args[2]);
 			File outputFile = new File(args[3]);
@@ -69,7 +69,7 @@ public class RSA{
 		
 			out.writeInt( (int)c );
 		}}catch (Exception ex){
-			if(DEBUG) System.out.println("End of file." );
+			if(DEBUG) System.out.println("End of file.");
 		}
 		
 		
@@ -91,8 +91,7 @@ public class RSA{
 			return;}
 		long[] solution = euclid(e, phi);
 		long d = solution[1];
-
-		
+		while(d < 0) d+= phi;		
 		
 		if (DEBUG) System.out.println("n, e, d");
 		System.out.println(n + " " + e + " " + d);
