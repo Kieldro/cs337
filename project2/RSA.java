@@ -61,7 +61,12 @@ public class RSA{
 			
 			// concatenate 3 bytes into a long
 			m = 0;
-			for(int i = 2; i >= 0 && in.available() > 0; --i){
+			int i = 0;
+			if(true)
+				i = 2;
+			else
+				i = 3;
+			for(; i >= 0 && in.available() > 0; --i){
 				long inByte = in.readByte();
 				// debug output in hex and dec
 				if(DEBUG) System.out.println(String.format(" inByte = 0x%1$X, %1$d", inByte) );
@@ -69,8 +74,11 @@ public class RSA{
 			
 			}
 			if(DEBUG) System.out.println(String.format("m = 0x%1$X, %1$d", m) );
-		
-			long c = exponentiation(m, e, n);		// ciphertext
+			if(true)
+				key = e;
+			else
+				key = d;
+			long c = exponentiation(m, key, n);		// ciphertext
 			if(DEBUG) System.out.println(String.format("c = 0x%1$X, %1$d", c) );
 		
 			out.writeInt( (int)c );
