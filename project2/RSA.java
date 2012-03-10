@@ -7,26 +7,58 @@ project 2
 
 Pair programming log (> 90% paired)
 3/8 4:30 - 5:30p  Ian, Dan 2 hr
-3/11 7 - 8p  Dan, 1 hr
+3/9 6 - 7p  Dan, 1 hr
+3/9 7 - 10p  Ian, Dan, 6 hr
 3/14 2:30p - 5:30p Ian, Dan, 6 hrs
 
 Total time 23 hrs, 19 hrs of pair programing
 
 */
-
-
+import java.io.*;		// for File
+import java.util.*;		// for scanner
 
 
 public class RSA{
 	final static boolean DEBUG = true;
-	public static void main(String[] args){
+	public static void main(String[] args) throws Exception{
 		String arg = args[0];
 		if (arg.equals("key") ){
 			long p = Long.valueOf(args[1]);
 			long q = Long.valueOf(args[2]);
 			genKey(p, q);
+		}if (arg.equals("encrypt") ){
+			File inputFile = new File(args[1]);
+			File keyFile = new File(args[2]);
+			File outputFile = new File(args[3]);
+			encrypt(inputFile, keyFile, outputFile);
 		}else
 			System.out.println("Invalid arguement: " + arg);
+		
+		
+	}
+	
+	public static void encrypt(File inputFile, File keyFile, File outputFile) throws Exception
+	{
+		long n = 0;
+		long e = 0;
+		long d = 0;
+		
+		Scanner sc = new Scanner(keyFile);
+		n = sc.nextLong();
+		e = sc.nextLong();
+		d = sc.nextLong();
+		if (DEBUG) System.out.println("n, e, d");
+		if (DEBUG) System.out.println(n + " " + e + " " + d);
+		
+		DataInputStream in = new DataInputStream(new FileInputStream(inputFile) );
+		DataOutputStream out = new DataOutputStream(new FileOutputStream(outputFile) );
+		
+		for(int i = 0; i < 3; ++i){
+			byte b = in.readByte();
+			// debug output in hex
+			if(DEBUG) System.out.println(String.format("in.readByte() = 0x%1$X, %1$d", b) );
+			
+		}
 		
 		
 	}
@@ -51,7 +83,7 @@ public class RSA{
 		
 		
 		if (DEBUG) System.out.println("n, e, d");
-		System.out.println(" " + n + " " + e + " " + d);
+		System.out.println(n + " " + e + " " + d);
 	}
 
 	public static long gcd(long y, long z){
