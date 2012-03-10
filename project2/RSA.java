@@ -17,7 +17,6 @@ Total time 23 hrs, 19 hrs of pair programing
 import java.io.*;		// for File
 import java.util.*;		// for scanner
 
-
 public class RSA{
 	final static boolean DEBUG = true;
 	public static void main(String[] args) throws Exception{
@@ -26,7 +25,7 @@ public class RSA{
 			long p = Long.valueOf(args[1]);
 			long q = Long.valueOf(args[2]);
 			genKey(p, q);
-		}if (arg.equals("encrypt") ){
+		}else if (arg.equals("encrypt") ){
 			File inputFile = new File(args[1]);
 			File keyFile = new File(args[2]);
 			File outputFile = new File(args[3]);
@@ -55,17 +54,18 @@ public class RSA{
 		try{while(true){
 		
 			// concatenate 3 bytes into a long
-			long m = 0;
+			long m = 0;		// message block
 			for(int i = 2; i >= 0; --i){
 				long inByte = in.readByte();
-				// debug output in hex
-				if(DEBUG) System.out.println(String.format("in.readByte() = 0x%1$X, %1$d", inByte) );
-				m = (inByte << i*8) | m ;
+				// debug output in hex and dec
+				if(DEBUG) System.out.println(String.format(" inByte = 0x%1$X, %1$d", inByte) );
+				m = (inByte << i*8) | m ;		//  shift byte then or into m
 			
 			}
-			if(DEBUG) System.out.println(String.format("block = 0x%1$X, %1$d", m) );
+			if(DEBUG) System.out.println(String.format("m = 0x%1$X, %1$d", m) );
 		
-			long c = exponentiation(m, e, n);
+			long c = exponentiation(m, e, n);		// ciphertext
+			if(DEBUG) System.out.println(String.format("c = 0x%1$X, %1$d", c) );
 		
 			out.writeInt( (int)c );
 		}}catch (Exception ex){
@@ -77,10 +77,7 @@ public class RSA{
 	}
 	
 	public static void genKey(long p, long q){
-		if (!isPrime(p) || !isPrime(q) ){
-			System.out.println("p and q must both be prime.");
-			return;
-		}
+		assert(isPrime(p) && isPrime(q) ): "p and q must both be prime.";
 		
 		long n = p * q;
 		long phi = (p-1)*(q-1);
@@ -92,9 +89,6 @@ public class RSA{
 		long[] solution = euclid(e, phi);
 		long d = solution[1];
 
-		
-		
-		if (DEBUG) System.out.println("n, e, d");
 		System.out.println(n + " " + e + " " + d);
 	}
 
