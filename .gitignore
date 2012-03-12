@@ -13,7 +13,8 @@ a.out
 *.dcz
 *.cpz
 *.enc
+*.dec
 *.pdf
 RSA
 key
-
+pedo*

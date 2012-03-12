@@ -51,12 +51,15 @@ public class RSA{
 		long d = 0;
 		long m = 0;		// message block
 		
+		// input RSA key
 		Scanner sc = new Scanner(keyFile);
 		n = sc.nextLong();
 		e = sc.nextLong();
 		d = sc.nextLong();
 		if (DEBUG) System.out.println("n, e, d");
 		if (DEBUG) System.out.println(n + " " + e + " " + d);
+		sc.close();
+		
 		// to encrypt 3 bytes, n must be > 2^24
 		assert(n > Math.pow(2, 24) ): "n must be greater than 2^24.";
 		// n
@@ -64,42 +67,44 @@ public class RSA{
 		
 		DataInputStream in = new DataInputStream(new FileInputStream(inputFile) );
 		DataOutputStream out = new DataOutputStream(new FileOutputStream(outputFile) );
-		try{while(in.available() > 0){
+		
+//		try{
+		while(in.available() > 0){
 			
-			// concatenate 3 bytes into a long
+			// concatenate 3|4 bytes into a long
 			m = 0;
 			int i = decrypt ? 3 : 2;
 			for(; i >= 0 && in.available() > 0; --i){
-				long inByte = (long)in.readByte() & 0x0FF;
-				// debug output in hex and dec
+				long inByte = (long)in.readByte() & 0x0FF;		// acount for sign extension
+				// debug output in hex and decimal
 				if(DEBUG) System.out.println(String.format(" inByte = 0x%1$X, %1$d", inByte) );
 				m = (inByte << i*8) | m ;		//  shift byte then or into m
 			
 			}
 			if(DEBUG) System.out.println(String.format("m = 0x%1$X, %1$d", m) );
+			
+			// encrypt/decrypt block
 			long key = decrypt ? e : d;
 			long c = exponentiation(m, key, n);		// ciphertext
 			if(DEBUG) System.out.println(String.format("c = 0x%1$X, %1$d", c) );
 			
 			if (decrypt){
 				int dc = (int)c;		//  cast to int
-				out.writeByte( dc >> 16 );// write high byte
+				out.writeByte( dc >> 16 );		// write high byte
 				if(in.available() > 0 || (dc & 0x0000FFFF) != 0)		// only write high byte
-					out.writeByte( dc >> 8 );
+					out.writeByte( dc >> 8 );		//  write 2nd byte
 				if (in.available() > 0 || (dc & 0x0FF) != 0 )
-					out.writeByte(dc);		// shift right by 2 bytes
+					out.writeByte(dc);		// write low byte
+			// Encrypt output
 			}else		// encrypt always writes all 4 bytes
 				out.writeInt( (int)c );
 			
-		}}catch (Exception ex){
-			if(DEBUG) System.out.println("End of file.");
 		}
-		
-		sc.close();
+/*		}catch (Exception ex)
+			if(DEBUG) System.out.println("End of file.");
+*/		
 		in.close();
 		out.close();
-		
-		
 	}
 	
 	public static void genKey(long p, long q){
