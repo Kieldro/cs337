@@ -1,8 +1,8 @@
 
 # file variables
-original="original"
-encrypted=original".enc"
-decrypted=riginal".dec"
+original="pedobear-seal-of-approval.jpg"
+encrypted=$original".enc"
+decrypted=$original".dec"
 key="key"
 
 javac RSA.java
@@ -10,5 +10,5 @@ java -ea RSA key 4513 5101 > $key
 
 # test encrypt and decrypt
 java -ea RSA encrypt $original $key $encrypted
-#java -ea RSA decrypt $encrypted $key $decrypted
-#cmp -l -c $original $decrypted
+java -ea RSA decrypt $encrypted $key $decrypted
+cmp -l -c $original $decrypted

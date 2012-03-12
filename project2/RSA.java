@@ -9,16 +9,16 @@ Pair programming log (> 90% paired)
 3/8 4:30 - 5:30p  Ian, Dan 2 hr
 3/9 6 - 7p  Dan, 1 hr
 3/9 7 - 10p  Ian, Dan, 6 hr
-3/14 2:30p - 5:30p Ian, Dan, 6 hrs
+3/11 9:30p - 10:30p Ian, Dan, 2 hrs
 
-Total time 23 hrs, 19 hrs of pair programing
+Total time 11 hrs, 10 hrs of pair programing
 
 */
 import java.io.*;		// for File
 import java.util.*;		// for scanner
 
 public class RSA{
-	final static boolean DEBUG = true;
+	final static boolean DEBUG = false;
 	public static void main(String[] args) throws Exception{
 		String arg = args[0];
 		
@@ -31,16 +31,21 @@ public class RSA{
 			File inputFile = new File(args[1]);
 			File keyFile = new File(args[2]);
 			File outputFile = new File(args[3]);
-			encrypt(inputFile, keyFile, outputFile);
+			cipher(inputFile, keyFile, outputFile, false);
+			
+		}else if (arg.equals("decrypt") ){
+			File inputFile = new File(args[1]);
+			File keyFile = new File(args[2]);
+			File outputFile = new File(args[3]);
+			cipher(inputFile, keyFile, outputFile, true);
 			
 		}else
 			System.out.println("Invalid arguement: " + arg);
-		
-		
 	}
 	
-	public static void encrypt(File inputFile, File keyFile, File outputFile) throws Exception
+	public static void cipher(File inputFile, File keyFile, File outputFile, boolean decrypt) throws Exception
 	{
+		if(DEBUG) System.out.println(decrypt ? "DECRYPTING..." : "ENCRYPTING...");
 		long n = 0;
 		long e = 0;
 		long d = 0;
@@ -52,7 +57,9 @@ public class RSA{
 		d = sc.nextLong();
 		if (DEBUG) System.out.println("n, e, d");
 		if (DEBUG) System.out.println(n + " " + e + " " + d);
+		// to encrypt 3 bytes, n must be > 2^24
 		assert(n > Math.pow(2, 24) ): "n must be greater than 2^24.";
+		// n
 		assert(n < Math.pow(2, 30) ): "n must be less than 2^30.";
 		
 		DataInputStream in = new DataInputStream(new FileInputStream(inputFile) );
@@ -61,31 +68,36 @@ public class RSA{
 			
 			// concatenate 3 bytes into a long
 			m = 0;
-			int i = 0;
-			if(true)
-				i = 2;
-			else
-				i = 3;
+			int i = decrypt ? 3 : 2;
 			for(; i >= 0 && in.available() > 0; --i){
-				long inByte = in.readByte();
+				long inByte = (long)in.readByte() & 0x0FF;
 				// debug output in hex and dec
 				if(DEBUG) System.out.println(String.format(" inByte = 0x%1$X, %1$d", inByte) );
 				m = (inByte << i*8) | m ;		//  shift byte then or into m
 			
 			}
 			if(DEBUG) System.out.println(String.format("m = 0x%1$X, %1$d", m) );
-			if(true)
-				key = e;
-			else
-				key = d;
+			long key = decrypt ? e : d;
 			long c = exponentiation(m, key, n);		// ciphertext
 			if(DEBUG) System.out.println(String.format("c = 0x%1$X, %1$d", c) );
-		
-			out.writeInt( (int)c );
+			
+			if (decrypt){
+				int dc = (int)c;		//  cast to int
+				out.writeByte( dc >> 16 );// write high byte
+				if(in.available() > 0 || (dc & 0x0000FFFF) != 0)		// only write high byte
+					out.writeByte( dc >> 8 );
+				if (in.available() > 0 || (dc & 0x0FF) != 0 )
+					out.writeByte(dc);		// shift right by 2 bytes
+			}else		// encrypt always writes all 4 bytes
+				out.writeInt( (int)c );
+			
 		}}catch (Exception ex){
 			if(DEBUG) System.out.println("End of file.");
 		}
 		
+		sc.close();
+		in.close();
+		out.close();
 		
 		
 	}
