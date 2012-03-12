@@ -112,8 +112,7 @@ public class RSA{
 		if(e < 2){
 			System.out.println("***ERROR*** Could not calculate e");
 			return;}
-		long[] solution = euclid(e, phi);
-		long d = solution[1];
+		long d = euclid(e, phi)[0];
 		
 		while(d < 0) d+= phi;
 		
@@ -136,12 +135,12 @@ public class RSA{
 		return gcd(z, y % z);
 	}
 
-	public static long[] euclid(long p, long q){
-		if(q == 0) return p;
-		long sol = euclid(q, p % q);
-		return sol;
-		
-		
+	public static long[] euclid(long a, long b){
+		if(b == 0) return new long[]{1, 0};
+		long q = a / b;
+		long r = a % b;
+		long[] z = euclid(b, r);
+		return new long[]{z[1], (z[0] - (q * z[1]))};		
 	}
 
 	public static long calce(long phi, long n){
