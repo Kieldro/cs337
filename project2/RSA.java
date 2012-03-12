@@ -137,9 +137,9 @@ public class RSA{
 	}
 
 	public static long[] euclid(long p, long q){
-		if(q == 0) return new long[]{p, 1, 0};
-		long[] sol = euclid(q, p % q);
-		return new long[] {sol[0], sol[2], sol[1] - ((p / q) * sol[2])};
+		if(q == 0) return p;
+		long sol = euclid(q, p % q);
+		return sol;
 		
 		
 	}
