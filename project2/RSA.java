@@ -68,9 +68,7 @@ public class RSA{
 		DataInputStream in = new DataInputStream(new FileInputStream(inputFile) );
 		DataOutputStream out = new DataOutputStream(new FileOutputStream(outputFile) );
 		
-//		try{
 		while(in.available() > 0){
-			
 			// concatenate 3|4 bytes into a long
 			m = 0;
 			int i = decrypt ? 3 : 2;
@@ -100,9 +98,7 @@ public class RSA{
 				out.writeInt( (int)c );
 			
 		}
-/*		}catch (Exception ex)
-			if(DEBUG) System.out.println("End of file.");
-*/		
+		
 		in.close();
 		out.close();
 	}
