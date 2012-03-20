@@ -75,16 +75,16 @@ public class RSA{
 			m = 0;
 			int i = decrypt ? 3 : 2;
 			for(; i >= 0 && in.available() > 0; --i){
-				long inByte = (long)in.readByte() & 0x0FF;		// acount for sign extension
+				long inByte = ((long)in.readByte()) & 0x000000FF;		// acount for sign extension
 				// debug output in hex and decimal
 				if(DEBUG) System.out.println(String.format(" inByte = 0x%1$X, %1$d", inByte) );
-				m = (inByte << i*8) | m ;		//  shift byte then or into m
+				m = (inByte << i*8) | m ;		// shift byte then or into m
 			
 			}
 			if(DEBUG) System.out.println(String.format("m = 0x%1$X, %1$d", m) );
 			
 			// encrypt/decrypt block
-			long key = decrypt ? e : d;
+			long key = decrypt ? d : e;
 			long c = exponentiation(m, key, n);		// ciphertext
 			if(DEBUG) System.out.println(String.format("c = 0x%1$X, %1$d", c) );
 			
