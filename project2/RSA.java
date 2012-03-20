@@ -21,28 +21,28 @@ public class RSA{
 	final static boolean DEBUG = false;
 	public static void main(String[] args) throws Exception{
 		String arg = args[0];
-		
+
 		if (arg.equals("key") ){
 			long p = Long.valueOf(args[1]);
 			long q = Long.valueOf(args[2]);
 			genKey(p, q);
-			
+
 		}else if (arg.equals("encrypt") ){
 			File inputFile = new File(args[1]);
 			File keyFile = new File(args[2]);
 			File outputFile = new File(args[3]);
 			cipher(inputFile, keyFile, outputFile, false);
-			
+
 		}else if (arg.equals("decrypt") ){
 			File inputFile = new File(args[1]);
 			File keyFile = new File(args[2]);
 			File outputFile = new File(args[3]);
 			cipher(inputFile, keyFile, outputFile, true);
-			
+
 		}else
 			System.out.println("Invalid arguement: " + arg);
 	}
-	
+
 	public static void cipher(File inputFile, File keyFile, File outputFile, boolean decrypt) throws Exception
 	{
 		if(DEBUG) System.out.println(decrypt ? "DECRYPTING..." : "ENCRYPTING...");
@@ -50,7 +50,7 @@ public class RSA{
 		long e = 0;
 		long d = 0;
 		long m = 0;		// message block
-		
+
 		// input RSA key
 		Scanner sc = new Scanner(keyFile);
 		n = sc.nextLong();
@@ -59,35 +59,33 @@ public class RSA{
 		if (DEBUG) System.out.println("n, e, d");
 		if (DEBUG) System.out.println(n + " " + e + " " + d);
 		sc.close();
-		
+
 		// to encrypt 3 bytes, n must be > 2^24
 		assert(n > Math.pow(2, 24) ): "n must be greater than 2^24.";
 		// n
 		assert(n < Math.pow(2, 30) ): "n must be less than 2^30.";
-		
+
 		DataInputStream in = new DataInputStream(new FileInputStream(inputFile) );
 		DataOutputStream out = new DataOutputStream(new FileOutputStream(outputFile) );
-		
-//		try{
+
 		while(in.available() > 0){
-			
 			// concatenate 3|4 bytes into a long
 			m = 0;
 			int i = decrypt ? 3 : 2;
 			for(; i >= 0 && in.available() > 0; --i){
-				long inByte = ((long)in.readByte()) & 0x000000FF;		// acount for sign extension
+				long inByte = (long)in.readByte() & 0x0FF;		// acount for sign extension
 				// debug output in hex and decimal
 				if(DEBUG) System.out.println(String.format(" inByte = 0x%1$X, %1$d", inByte) );
-				m = (inByte << i*8) | m ;		// shift byte then or into m
-			
+				m = (inByte << i*8) | m ;		//  shift byte then or into m
+
 			}
 			if(DEBUG) System.out.println(String.format("m = 0x%1$X, %1$d", m) );
-			
+
 			// encrypt/decrypt block
 			long key = decrypt ? d : e;
 			long c = exponentiation(m, key, n);		// ciphertext
 			if(DEBUG) System.out.println(String.format("c = 0x%1$X, %1$d", c) );
-			
+
 			if (decrypt){
 				int dc = (int)c;		//  cast to int
 				out.writeByte( dc >> 16 );		// write high byte
@@ -98,18 +96,16 @@ public class RSA{
 			// Encrypt output
 			}else		// encrypt always writes all 4 bytes
 				out.writeInt( (int)c );
-			
+
 		}
-/*		}catch (Exception ex)
-			if(DEBUG) System.out.println("End of file.");
-*/		
+
 		in.close();
 		out.close();
 	}
-	
+
 	public static void genKey(long p, long q){
 		assert(isPrime(p) && isPrime(q) ): "p and q must both be prime.";
-		
+
 		long n = p * q;
 		long phi = (p-1)*(q-1);
 		long x = 3;
@@ -118,9 +114,9 @@ public class RSA{
 			System.out.println("***ERROR*** Could not calculate e");
 			return;}
 		long d = euclid(e, phi)[0];
-		
+
 		while(d < 0) d+= phi;
-		
+
 		System.out.println(n + " " + e + " " + d);
 	}
 
@@ -146,7 +142,7 @@ public class RSA{
 		long r = a % b;
 		long[] z = euclid(b, r);
 		return new long[]{z[1], (z[0] - (q * z[1]))};		
-	
+
 	}
 
 	public static long calce(long phi, long n){
@@ -156,7 +152,7 @@ public class RSA{
 		return 0;
 
 	}
-	
+
 	public static boolean isPrime(long x){
 		if(x % 2 == 0) return false;
 		for(int i = 3; i*i <= x; i += 2)
