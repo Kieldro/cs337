@@ -26,24 +26,21 @@ public class RSA{
 			long p = Long.valueOf(args[1]);
 			long q = Long.valueOf(args[2]);
 			genKey(p, q);
-
-		}else if (arg.equals("encrypt") ){
+		}else{
+			assert (arg.equals("encrypt") || arg.equals("decrypt") ):
+				"Invalid arguement: " + arg;
+		
 			File inputFile = new File(args[1]);
 			File keyFile = new File(args[2]);
 			File outputFile = new File(args[3]);
-			cipher(inputFile, keyFile, outputFile, false);
-
-		}else if (arg.equals("decrypt") ){
-			File inputFile = new File(args[1]);
-			File keyFile = new File(args[2]);
-			File outputFile = new File(args[3]);
-			cipher(inputFile, keyFile, outputFile, true);
-
-		}else
-			System.out.println("Invalid arguement: " + arg);
+			boolean decrypt = arg.equals("decrypt");
+		
+			cipher(inputFile, keyFile, outputFile, decrypt);
+		}
 	}
 
-	public static void cipher(File inputFile, File keyFile, File outputFile, boolean decrypt) throws Exception
+	public static void cipher(File inputFile, File keyFile, File outputFile,
+								boolean decrypt) throws Exception
 	{
 		if(DEBUG) System.out.println(decrypt ? "DECRYPTING..." : "ENCRYPTING...");
 		long n = 0;
@@ -69,14 +66,14 @@ public class RSA{
 		DataOutputStream out = new DataOutputStream(new FileOutputStream(outputFile) );
 
 		while(in.available() > 0){
-			// concatenate 3|4 bytes into a long
-			m = 0;
+			// concatenate 3 | 4 bytes into a long
+			m = 0;		// message block
 			int i = decrypt ? 3 : 2;
 			for(; i >= 0 && in.available() > 0; --i){
-				long inByte = (long)in.readByte() & 0x0FF;		// acount for sign extension
+				long inByte = (long)in.readByte() & 0x0FF;		// correct any sign extension
 				// debug output in hex and decimal
 				if(DEBUG) System.out.println(String.format(" inByte = 0x%1$X, %1$d", inByte) );
-				m = (inByte << i*8) | m ;		//  shift byte then or into m
+				m = (inByte << i*8) | m ;		//  shift byte, then OR into m
 
 			}
 			if(DEBUG) System.out.println(String.format("m = 0x%1$X, %1$d", m) );
@@ -96,7 +93,6 @@ public class RSA{
 			// Encrypt output
 			}else		// encrypt always writes all 4 bytes
 				out.writeInt( (int)c );
-
 		}
 
 		in.close();
@@ -108,14 +104,13 @@ public class RSA{
 
 		long n = p * q;
 		long phi = (p-1)*(q-1);
-		long x = 3;
 		long e = calce(phi, n);
-		if(e < 2){
-			System.out.println("***ERROR*** Could not calculate e");
-			return;}
+		
+		assert(e >= 2): "Could not calculate e (e < 2)";
+		
 		long d = euclid(e, phi)[0];
 
-		while(d < 0) d+= phi;
+		while(d < 0) d += phi;
 
 		System.out.println(n + " " + e + " " + d);
 	}
@@ -138,21 +133,24 @@ public class RSA{
 
 	public static long[] euclid(long a, long b){
 		if(b == 0) return new long[]{1, 0};
+		
 		long q = a / b;
 		long r = a % b;
 		long[] z = euclid(b, r);
+		
 		return new long[]{z[1], (z[0] - (q * z[1]))};		
 
 	}
 
 	public static long calce(long phi, long n){
 		for(long x = 3; x < n; x+=2){
-			if(gcd(phi, x) == 1) return x;		
+			if(gcd(phi, x) == 1) return x;	
 		}
 		return 0;
 
 	}
 
+	// Returns true if x is prime.
 	public static boolean isPrime(long x){
 		if(x % 2 == 0) return false;
 		for(int i = 3; i*i <= x; i += 2)

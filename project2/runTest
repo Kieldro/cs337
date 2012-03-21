@@ -1,14 +1,22 @@
 
 # file variables
-original="pedobear-seal-of-approval.jpg"
+original="test"
 encrypted=$original".enc"
 decrypted=$original".dec"
 key="key"
 
+echo compiling...
 javac RSA.java
+
+echo generating key...
 java -ea RSA key 4513 5101 > $key
 
 # test encrypt and decrypt
+echo encrypting $original to $encrypted...
 java -ea RSA encrypt $original $key $encrypted
+
+echo decrypting $encrypted to $decrypted...
 java -ea RSA decrypt $encrypted $key $decrypted
+
+echo comparing $original and $decrypted...
 cmp -l -c $original $decrypted
