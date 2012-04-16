@@ -1,1 +1,5 @@
-fox
+&quick&
+&quick brown fox&
+&O happy dagger!
+This is thy sheath; there rust, and let me die.&
+&elephant&

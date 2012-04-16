@@ -1,14 +1,10 @@
-
 # file variables
 pattern="pattern.txt"
 source="source.txt"
 outFile="results.txt"
 
-echo compiling...
+echo COMPILING...
 javac strMatch.java
 
-echo running...
+echo EXECTUTING...
 java strMatch $pattern $source $outFile
-
-#echo comparing $original and $decrypted...
-#cmp -lc $encrypted test2.enc
