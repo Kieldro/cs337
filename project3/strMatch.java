@@ -19,20 +19,44 @@ import java.util.*;		// for scanner
 
 public class RSA{
 	final static boolean DEBUG = true;
+	File patternFile;
+	
+	
 	public static void main(String[] args)// throws Exception
 	{
-		String arg = args[0];
-		File inputFile = new File(args[1]);
+		patternFile = new File(args[0]);
+		File sourceFile = new File(args[1]);
+		File outFile = new File(args[2]);
+		
 		BF(inputFile);
+		RK();
+		KMP();
+		BM();
 	}
 
 	public static void BF()
 	{
 		if(DEBUG) System.out.println("test");
+		
 		// input
-		Scanner sc = new Scanner(file);
+		Scanner sc = new Scanner(patternFile);
 		n = sc.nextLong();
 		sc.close();
+	}
+	
+	public static void RK(){
+		
+		
+	}
+	
+	public static void KMP(){
+		
+		
+	}
+	
+	public static void BM(){
+		
+		
 	}
 
 	public static long exponentiation(long a, long b, long n){
