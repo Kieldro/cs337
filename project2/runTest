@@ -1,22 +1,25 @@
 
 # file variables
-original="test"
-encrypted=$original".enc"
-decrypted=$original".dec"
-key="key"
+original="test3.txt"
+encrypted="test3.enc"
+decrypted="test3.txt.dec"
+key="keyfile"
 
 echo compiling...
 javac RSA.java
 
-echo generating key...
-java -ea RSA key 4513 5101 > $key
+#echo generating key...
+#java -ea RSA key 4513 5101 > $key
 
 # test encrypt and decrypt
-echo encrypting $original to $encrypted...
-java -ea RSA encrypt $original $key $encrypted
+#echo encrypting $original to $encrypted...
+#java -ea RSA encrypt $original $key $encrypted
+
+#echo comparing $original and $decrypted...
+#cmp -lc $encrypted test2.enc
 
 echo decrypting $encrypted to $decrypted...
 java -ea RSA decrypt $encrypted $key $decrypted
 
-echo comparing $original and $decrypted...
-cmp -l -c $original $decrypted
+#echo comparing $original and $decrypted...
+#cmp -lc $original $decrypted
