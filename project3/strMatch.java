@@ -1,6 +1,6 @@
 /*
 Ian Buitrago: Slip days used for this project: 0  Slip days used (total): 1
-John Richter: Slip days used for this project: 0  Slip days used (total): 0
+John Richter: Slip days used for this project: 0  Slip days used (total): 2
 CS 337
 project 3
 4/30/2012
@@ -13,7 +13,7 @@ Pair programming log (> 90% paired)
 
 Total time 11 hrs, 10 hrs of pair programing
 
-NOTES: 
+NOTES:
 run with: source runTest.sh
 
 */
@@ -32,26 +32,33 @@ public class strMatch{
 		patternFile = new File(args[0]);
 		sourceFile = new File(args[1]);
 		outFile = new File(args[2]);
-		
+		boolean found = false;
+		String result = "";
 		
 		
 		// input
 		Scanner sc = new Scanner(patternFile);
 		
 		while(sc.hasNext() ){
+			// find pattern
 			sc.useDelimiter("&\n?&?");
 			String pattern = sc.next();
-			
 			//if(DEBUG) System.out.println("pattern: \"" + pattern + '"');
+			
 			//if(DEBUG) System.out.println("pattern[-1]: \"" + (int)pattern.charAt(pattern.length()-1) + '"');
 		
-		
-			String result = BF(pattern) ? "PASSED" : "FAILED";
+		/*	if (sourceFile.length() < pattern.length() )		// text is too small
+				found = false;
+	*/	
+/*			found = BF(pattern);
+			result = found ? "PASSED" : "FAILED";
 			System.out.println("BF " + result + ": " + pattern);
-		
-			RK();
-			KMP();
-			BM();
+*/	
+			found = RK(pattern);
+			result = found ? "PASSED" : "FAILED";
+			System.out.println("RK " + result + ": " + pattern);
+//			KMP();
+	//		BM();
 		}
 		
 		sc.close();
@@ -60,9 +67,6 @@ public class strMatch{
 	// Brute Force method
 	public static boolean BF(String pattern) throws Exception
 	{
-		if (sourceFile.length() < pattern.length() )		// text is too small
-			return false;
-		
 		Scanner sc = new Scanner(sourceFile);
 		String text = sc.nextLine();
 		//if(DEBUG) System.out.println("text:    \"" + text + '"');
@@ -84,9 +88,64 @@ public class strMatch{
 	}
 	
 	// Rabin-Karp
-	public static void RK(){
+	public static boolean RK(String pattern) throws Exception
+	{
+		final int pLen = pattern.length();
+		BufferedReader in = new BufferedReader(new FileReader(sourceFile));
+		String s = "";
+		int patternHash = hash(pattern);
+		int sHash = 0;
+		char newChar = 0;
+		//if(DEBUG) System.out.println("newChar:    \"" + newChar + '"');
+		//if(DEBUG) System.out.println("hash(pattern):    \"" + patternHash + '"');
+		assert(sourceFile.length() >= pLen) : "Pattern too large for file.";
 		
+		// initialize s
+		while(s.length() < pLen-1) {
+			s += (char)in.read();
+		}
+		sHash = hash(s);
 		
+		for(int i = pLen; i < sourceFile.length()-pLen; ++i){
+			if(DEBUG) System.out.println("s:    \"" + s + '"');
+			newChar = (char)in.read();
+			s += newChar;
+			s = s.substring(1, pLen);
+			sHash = hash(s, sHash, newChar);		// update hash
+			
+			if (patternHash == sHash )
+				for(int j = 0; j < pLen; ++j){
+					if(s.charAt(j) != pattern.charAt(j) )
+						break;		// don't check rest of string
+					if(j == pLen-1 )		// all chars matched
+						return true;
+				}
+		}
+		
+		in.close();
+		
+		return false;
+		
+	}
+	
+	// initial hash
+	static int hash(String s){
+		int result = 0;
+		
+		for(int i = 0; i < s.length(); ++i)
+			result += s.charAt(i);
+		
+		return result;
+	}
+	
+	// update hash
+	static int hash(String s, int prevHash, char newChar){
+		int result = prevHash;
+		
+		result -= s.charAt(0);
+		result += newChar;
+		
+		return result;
 	}
 	
 	public static void KMP(){
