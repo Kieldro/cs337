@@ -25,7 +25,6 @@ public class strMatch{
 	static File sourceFile;
 	static File outFile;
 	
-	
 	public static void main(String[] args) throws Exception
 	{
 		patternFile = new File(args[0]);
@@ -34,17 +33,15 @@ public class strMatch{
 		boolean found = false;
 		String result = "";
 		
-		
 		// input
 		Scanner sc = new Scanner(patternFile);
+		sc.useDelimiter("&\n?&?");
 		
+		// run for each pattern
 		while(sc.hasNext() ){
 			// find pattern
-			sc.useDelimiter("&\n?&?");
 			String pattern = sc.next();
 			//if(DEBUG) System.out.println("pattern: \"" + pattern + '"');
-			
-			//if(DEBUG) System.out.println("pattern[-1]: \"" + (int)pattern.charAt(pattern.length()-1) + '"');
 		
 		/*	if (sourceFile.length() < pattern.length() )		// text is too small
 				found = false;
@@ -52,6 +49,7 @@ public class strMatch{
 /*			found = BF(pattern);
 			result = found ? "PASSED" : "FAILED";
 			System.out.println("BF " + result + ": " + pattern);
+			output(alg, pattern)
 */	
 			found = RK(pattern);
 			result = found ? "PASSED" : "FAILED";
@@ -61,6 +59,26 @@ public class strMatch{
 		}
 		
 		sc.close();
+	}
+	
+	static void output(String alg, String pattern) throws Exception{
+		boolean found = false;
+		switch(alg.hashCode() ){
+			case 1:
+				found = BF(pattern);
+				break;
+			case 2:
+				found = RK(pattern);
+				break;
+		/*	case 3:
+				found = KMP(pattern);
+				break;
+			case 4:
+				found = BM(pattern);
+		*/}
+		
+		String result = found ? "PASSED" : "FAILED";
+		System.out.println(alg + " " + result + ": " + pattern);
 	}
 	
 	// Brute Force method
