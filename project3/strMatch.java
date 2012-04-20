@@ -27,6 +27,8 @@ public class strMatch{
 	
 	public static void main(String[] args) throws Exception
 	{
+		double endTime, elapsedTime, startTime = System.currentTimeMillis();
+		System.out.println("startTime: " + startTime + " ms");
 		patternFile = new File(args[0]);
 		sourceFile = new File(args[1]);
 		outFile = new File(args[2]);
@@ -42,13 +44,16 @@ public class strMatch{
 			String pattern = sc.next();
 			//if(DEBUG) System.out.println("pattern: \"" + pattern + '"');
 			
-			output("BF", pattern);
+//			output("BF", pattern);
 			output("RK", pattern);
 //			output("KMP", pattern);
 //			output("BM", pattern);
 		}
-		
 		sc.close();
+		
+		endTime = System.currentTimeMillis();
+		elapsedTime = endTime - startTime;
+		System.out.println("main() elapsedTime: " + elapsedTime + " ms");
 	}
 	
 	static void output(String alg, String pattern) throws Exception{

@@ -1,6 +1,6 @@
 # file variables
-pattern="pattern.txt"
-source="source.txt"
+pattern="Pattern.txt"
+source="Source.txt"
 outFile="results.txt"
 
 echo COMPILING...
