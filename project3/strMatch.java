@@ -6,11 +6,11 @@ project 3
 4/30/2012
 
 Pair programming log (> 90% paired)
-4/16 1 - 3p  Ian 2 hr
+4/16 1 - 3p  Ian 2 hrs
 4/17 1 - 3p  Ian, John 4 hr
-4/19 12 - 2p Ian, John 4 hrs
+4/20 10 - 11a Ian 1 hr
 
-Total time 10 hrs, 8 hrs of pair programing
+Total time 11 hrs, 8 hrs of pair programing
 
 NOTES:
 run with: source runTest.sh
@@ -20,7 +20,7 @@ import java.io.*;		// for File
 import java.util.*;		// for scanner
 
 public class strMatch{
-	final static boolean DEBUG = true;
+	final static boolean DEBUG = !true;
 	static File patternFile;
 	static File sourceFile;
 	static File outFile;
@@ -37,25 +37,15 @@ public class strMatch{
 		Scanner sc = new Scanner(patternFile);
 		sc.useDelimiter("&\n?&?");
 		
-		// run for each pattern
-		while(sc.hasNext() ){
+		while(sc.hasNext() ){		// run for each pattern
 			// find pattern
 			String pattern = sc.next();
 			//if(DEBUG) System.out.println("pattern: \"" + pattern + '"');
-		
-		/*	if (sourceFile.length() < pattern.length() )		// text is too small
-				found = false;
-	*/	
-/*			found = BF(pattern);
-			result = found ? "PASSED" : "FAILED";
-			System.out.println("BF " + result + ": " + pattern);
-			output(alg, pattern)
-*/	
-			found = RK(pattern);
-			result = found ? "PASSED" : "FAILED";
-			System.out.println("RK " + result + ": " + pattern);
-//			KMP();
-	//		BM();
+			
+			output("BF", pattern);
+			output("RK", pattern);
+//			output("KMP", pattern);
+//			output("BM", pattern);
 		}
 		
 		sc.close();
@@ -63,48 +53,58 @@ public class strMatch{
 	
 	static void output(String alg, String pattern) throws Exception{
 		boolean found = false;
-		switch(alg.hashCode() ){
-			case 1:
-				found = BF(pattern);
-				break;
-			case 2:
-				found = RK(pattern);
-				break;
-		/*	case 3:
-				found = KMP(pattern);
-				break;
-			case 4:
-				found = BM(pattern);
-		*/}
 		
+		if(pattern.equals(""))		// empty string pattern
+			found = true;
+		else if(sourceFile.length() < pattern.length() )		// source text too small
+			found = false;
+		else if(alg.equals("BF") )
+			found = BF(pattern);
+		else if(alg.equals("RK") )
+			found = RK(pattern);
+		else if(alg.equals("KMP") )
+			found = KMP(pattern);
+		else if(alg.equals("BM") )
+			found = BM(pattern);
+			
 		String result = found ? "PASSED" : "FAILED";
 		System.out.println(alg + " " + result + ": " + pattern);
 	}
 	
 	// Brute Force method
-	public static boolean BF(String pattern) throws Exception
-	{
-		Scanner sc = new Scanner(sourceFile);
-		String text = sc.nextLine();
-		//if(DEBUG) System.out.println("text:    \"" + text + '"');
+	public static boolean BF(String pattern) throws Exception{
+		final int pLen = pattern.length();
+		BufferedReader in = new BufferedReader(new FileReader(sourceFile));
+		String s = "$"; // initialized to dummy char that will be removed later
+		char newChar = 0;
+		//if(DEBUG) System.out.println("newChar:    \"" + newChar + '"');
+		assert(sourceFile.length() >= pLen) : "Pattern too large for file.";
 		
-		for(int i = 0; i < sourceFile.length(); ++i){
-			for(int j = 0; j < pattern.length() && i + j < text.length(); ++j){
-				if(text.charAt(i + j) != pattern.charAt(j) )
-					break;
-				if(j == pattern.length()-1 )		// all chars matched
+		// initialize s
+		while(s.length() < pLen) {
+			s += (char)in.read();
+		}
+		
+		for(int i = pLen; i < sourceFile.length()-pLen; ++i){
+			if(DEBUG) System.out.println("s:    \"" + s + '"');
+			newChar = (char)in.read();
+			s += newChar;		// update substrings
+			s = s.substring(1, pLen+1);
+			for(int j = 0; j < pLen; ++j){
+				if(s.charAt(j) != pattern.charAt(j) )
+					break;		// don't check rest of string
+				if(j == pLen-1 )		// all chars matched
 					return true;
 			}
 		}
 		
-		sc.close();
+		in.close();
 		
 		return false;
 	}
 	
 	// Rabin-Karp
-	public static boolean RK(String pattern) throws Exception
-	{
+	public static boolean RK(String pattern) throws Exception{
 		final int pLen = pattern.length();
 		BufferedReader in = new BufferedReader(new FileReader(sourceFile));
 		String s = "$"; // initialized to dummy char that will be removed later
@@ -165,14 +165,14 @@ public class strMatch{
 		return result;
 	}
 	
-	public static void KMP(){
-		
-		
+	public static boolean KMP(String pattern) throws Exception{
+		System.out.println("KMP not implemented!");
+		return false;
 	}
 	
-	public static void BM(){
-		
-		
+	public static boolean BM(String pattern) throws Exception{
+		System.out.println("BM not implemented!");
+		return false;
 	}
 
 	public static long exponentiation(long a, long b, long n){
@@ -185,6 +185,7 @@ public class strMatch{
 		}
 		return c % n;
 	}
+	
 
 	// Returns true if x is prime.
 	public static boolean isPrime(long x){
