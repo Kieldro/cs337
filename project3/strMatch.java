@@ -24,41 +24,46 @@ public class strMatch{
 	static File patternFile;
 	static File sourceFile;
 	static File outFile;
+	static PrintWriter out = null;
 	
 	public static void main(String[] args) throws Exception
-	{
+	{   
 		double endTime, elapsedTime, startTime = System.currentTimeMillis();
 		System.out.println("startTime: " + startTime + " ms");
-		patternFile = new File(args[0]);
-		sourceFile = new File(args[1]);
-		outFile = new File(args[2]);
-		boolean found = false;
-		String result = "";
-		
-		// input
-		Scanner sc = new Scanner(patternFile);
-		sc.useDelimiter("&\n?&?");
-		
-		while(sc.hasNext() ){		// run for each pattern
-			// find pattern
+		try {
+			patternFile = new File(args[0]);
+			sourceFile = new File(args[1]);
+			outFile = new File(args[2]);
+			out = new PrintWriter(new FileWriter(outFile)); 
+			boolean found = false;
+			String result = "";
+
+			// input
+			Scanner sc = new Scanner(patternFile);
+			sc.useDelimiter("&\n?&?");
+
+			while(sc.hasNext() ){		// run for each pattern
+				// find pattern
 			String pattern = sc.next();
 			//if(DEBUG) System.out.println("pattern: \"" + pattern + '"');
-			
-//			output("BF", pattern);
+
+			output("BF", pattern);
 			output("RK", pattern);
 //			output("KMP", pattern);
 //			output("BM", pattern);
+			}
+		}finally {
+			out.close();
+			
+			endTime = System.currentTimeMillis();
+			elapsedTime = endTime - startTime;
+			System.out.println("main() elapsedTime: " + elapsedTime + " ms");
 		}
-		sc.close();
-		
-		endTime = System.currentTimeMillis();
-		elapsedTime = endTime - startTime;
-		System.out.println("main() elapsedTime: " + elapsedTime + " ms");
 	}
-	
+
 	static void output(String alg, String pattern) throws Exception{
 		boolean found = false;
-		
+
 		if(pattern.equals(""))		// empty string pattern
 			found = true;
 		else if(sourceFile.length() < pattern.length() )		// source text too small
@@ -71,11 +76,11 @@ public class strMatch{
 			found = KMP(pattern);
 		else if(alg.equals("BM") )
 			found = BM(pattern);
-			
+
 		String result = found ? "PASSED" : "FAILED";
-		System.out.println(alg + " " + result + ": " + pattern);
+		out.println(alg + " " + result + ": " + pattern);
 	}
-	
+
 	// Brute Force method
 	public static boolean BF(String pattern) throws Exception{
 		final int pLen = pattern.length();
@@ -84,12 +89,12 @@ public class strMatch{
 		char newChar = 0;
 		//if(DEBUG) System.out.println("newChar:    \"" + newChar + '"');
 		assert(sourceFile.length() >= pLen) : "Pattern too large for file.";
-		
+
 		// initialize s
 		while(s.length() < pLen) {
 			s += (char)in.read();
 		}
-		
+
 		for(int i = pLen; i < sourceFile.length()-pLen; ++i){
 			if(DEBUG) System.out.println("s:    \"" + s + '"');
 			newChar = (char)in.read();
@@ -102,12 +107,12 @@ public class strMatch{
 					return true;
 			}
 		}
-		
+
 		in.close();
-		
+
 		return false;
 	}
-	
+
 	// Rabin-Karp
 	public static boolean RK(String pattern) throws Exception{
 		final int pLen = pattern.length();
@@ -120,20 +125,20 @@ public class strMatch{
 		//if(DEBUG) System.out.println("newChar:    \"" + newChar + '"');
 		if(DEBUG) System.out.println("hash(pattern):    \"" + patternHash + '"');
 		assert(sourceFile.length() >= pLen) : "Pattern too large for file.";
-		
+
 		// initialize s
 		while(s.length() < pLen) {
 			s += (char)in.read();
 		}
 		sHash = hashFunc ? hash(pattern): hashBase(pattern);
-		
+
 		for(int i = pLen; i < sourceFile.length()-pLen; ++i){
 			if(DEBUG) System.out.println("s:    \"" + s + '"');
 			newChar = (char)in.read();
 			sHash = hash(s, sHash, newChar);		// update hash
 			s += newChar;		// update substrings
 			s = s.substring(1, pLen+1);
-			
+
 			//if(DEBUG) System.out.println("sHash = " + sHash);
 			if (patternHash == sHash ){
 				//if(DEBUG) System.out.println("hashes matched: " + patternHash + " == " + sHash);
@@ -145,59 +150,55 @@ public class strMatch{
 				}
 			}
 		}
-		
+
 		in.close();
-		
+
 		return false;
 	}
-	
+
 	// initial hash: using simple algorithm.
 	static int hash(String s){
 		int result = 0;
-		
+
 		for(int i = 0; i < s.length(); ++i)
 			result += s.charAt(i);
-		
+
 		return result;
 	}
-	
+
 	// update hash
 	static int hash(String s, int prevHash, char newChar){
 		int result = prevHash;
-		
+
 		result -= s.charAt(0);
 		result += newChar;
-		
+
 		return result;
 	}
-	
+
 	// initial hash: base 256
 	static int hashBase(String s){
 		int result = 0;
-		
+
 		for(int i = 0; i < s.length(); ++i)
 			result += s.charAt(i) * Math.pow(256, s.length()-i );
-		
+
 		result %= 7;		// mod by prime to reduce hash buckets
 		return result;
 	}
-	
+
 	// update hash
 	static int hashBase(String s, int prevHash, char newChar){
 		int result = prevHash;
-		
+
 		result -= s.charAt(0) * Math.pow(256, s.length() );
 		result += newChar;
 		result *= 256;
-		
+
 		return result;
 	}
-	
-	public static boolean KMP(String pattern) throws Exception{
-		System.out.println("KMP not implemented!");
-		return false;
-	}
-	
+
+
 	public static boolean BM(String pattern) throws Exception{
 		System.out.println("BM not implemented!");
 		return false;
@@ -213,7 +214,7 @@ public class strMatch{
 		}
 		return c % n;
 	}
-	
+
 
 	// Returns true if x is prime.
 	public static boolean isPrime(long x){
@@ -222,4 +223,26 @@ public class strMatch{
 			if(x%i == 0) return false;
 		return true;
 	}
+
+	public static boolean KMP(String pattern) throws Exception{
+		System.out.println("KMP not implemented!");
+		return false;
+	}
 }
+	// 	// char[] p = pattern.toCharArray();
+	// 	// char[] t = sourceFile.getCharacters();
+	// 	// 
+	// 	// int l=0;
+	// 	// int r=0;		
+	// 	// for(int i = 0; i < t.length; ++i){
+		// 		// 	if (t[r]==p[r-l])
+		// 		// 		r++;
+		// 		// 	else if (t[r]!= p[r-l] && r==l) {
+			// 			// 		l++;
+			// 			// 		r++;}
+			// 			// 		else if (t[r]!= p[r-l] && r>l) {
+				// 				// 			l = computeCore();
+				// 				// 		}
+				// 				// 	}
+				// 				// }
+				// 			
