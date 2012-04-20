@@ -20,7 +20,7 @@ import java.io.*;		// for File
 import java.util.*;		// for scanner
 
 public class strMatch{
-	final static boolean DEBUG = !true;
+	final static boolean DEBUG = true;
 	static File patternFile;
 	static File sourceFile;
 	static File outFile;
@@ -106,9 +106,10 @@ public class strMatch{
 	// Rabin-Karp
 	public static boolean RK(String pattern) throws Exception{
 		final int pLen = pattern.length();
+		boolean hashFunc = true;		// set to true for simple hash function
 		BufferedReader in = new BufferedReader(new FileReader(sourceFile));
 		String s = "$"; // initialized to dummy char that will be removed later
-		int patternHash = hash(pattern);
+		int patternHash = hashFunc ? hash(pattern): hashBase(pattern);
 		int sHash = 0;
 		char newChar = 0;
 		//if(DEBUG) System.out.println("newChar:    \"" + newChar + '"');
@@ -119,7 +120,7 @@ public class strMatch{
 		while(s.length() < pLen) {
 			s += (char)in.read();
 		}
-		sHash = hash(s);
+		sHash = hashFunc ? hash(pattern): hashBase(pattern);
 		
 		for(int i = pLen; i < sourceFile.length()-pLen; ++i){
 			if(DEBUG) System.out.println("s:    \"" + s + '"');
@@ -145,7 +146,7 @@ public class strMatch{
 		return false;
 	}
 	
-	// initial hash: using simple algorithm. Use base 256?
+	// initial hash: using simple algorithm.
 	static int hash(String s){
 		int result = 0;
 		
@@ -161,6 +162,28 @@ public class strMatch{
 		
 		result -= s.charAt(0);
 		result += newChar;
+		
+		return result;
+	}
+	
+	// initial hash: base 256
+	static int hashBase(String s){
+		int result = 0;
+		
+		for(int i = 0; i < s.length(); ++i)
+			result += s.charAt(i) * Math.pow(256, s.length()-i );
+		
+		result %= 7;		// mod by prime to reduce hash buckets
+		return result;
+	}
+	
+	// update hash
+	static int hashBase(String s, int prevHash, char newChar){
+		int result = prevHash;
+		
+		result -= s.charAt(0) * Math.pow(256, s.length() );
+		result += newChar;
+		result *= 256;
 		
 		return result;
 	}
