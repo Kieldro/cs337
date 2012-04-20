@@ -52,12 +52,11 @@ public class strMatch{
 			//			output("KMP", pattern);
 			//			output("BM", pattern);
 		}
-		finally {
-			out.close();
-		}
 	}
-
-	sc.close();
+	finally {
+		out.close();
+		sc.close();
+	}
 }
 
 static void output(String alg, String pattern) throws Exception{
@@ -199,47 +198,49 @@ static int hashBase(String s, int prevHash, char newChar){
 	return result;
 }
 
-public static boolean KMP(String pattern) throws Exception{
-	// char[] p = pattern.toCharArray();
-	// char[] t = sourceFile.getCharacters();
-	// 
-	// int l=0;
-	// int r=0;		
-	// for(int i = 0; i < t.length; ++i){
-		// 	if (t[r]==p[r-l])
-		// 		r++;
-		// 	else if (t[r]!= p[r-l] && r==l) {
-			// 		l++;
-			// 		r++;}
-			// 		else if (t[r]!= p[r-l] && r>l) {
-				// 			l = computeCore();
-				// 		}
-				// 	}
-				// }
-			}
 
-			public static boolean BM(String pattern) throws Exception{
-				System.out.println("BM not implemented!");
-				return false;
-			}
+public static boolean BM(String pattern) throws Exception{
+	System.out.println("BM not implemented!");
+	return false;
+}
 
-			public static long exponentiation(long a, long b, long n){
-				long c = 1;
-				while(b > 0){
-					if(b % 2 == 1)
-						c = ((c*a) % n);
-					a = (a*a) % n;
-					b = b / 2;
-				}
-				return c % n;
-			}
+public static long exponentiation(long a, long b, long n){
+	long c = 1;
+	while(b > 0){
+		if(b % 2 == 1)
+			c = ((c*a) % n);
+		a = (a*a) % n;
+		b = b / 2;
+	}
+	return c % n;
+}
 
 
-			// Returns true if x is prime.
-			public static boolean isPrime(long x){
-				if(x % 2 == 0) return false;
-				for(int i = 3; i*i <= x; i += 2)
-					if(x%i == 0) return false;
-				return true;
-			}
-		}
+// Returns true if x is prime.
+public static boolean isPrime(long x){
+	if(x % 2 == 0) return false;
+	for(int i = 3; i*i <= x; i += 2)
+		if(x%i == 0) return false;
+	return true;
+}
+}
+
+// 
+// public static boolean KMP(String pattern) throws Exception{
+	// 	// char[] p = pattern.toCharArray();
+	// 	// char[] t = sourceFile.getCharacters();
+	// 	// 
+	// 	// int l=0;
+	// 	// int r=0;		
+	// 	// for(int i = 0; i < t.length; ++i){
+		// 		// 	if (t[r]==p[r-l])
+		// 		// 		r++;
+		// 		// 	else if (t[r]!= p[r-l] && r==l) {
+			// 			// 		l++;
+			// 			// 		r++;}
+			// 			// 		else if (t[r]!= p[r-l] && r>l) {
+				// 				// 			l = computeCore();
+				// 				// 		}
+				// 				// 	}
+				// 				// }
+				// 			
