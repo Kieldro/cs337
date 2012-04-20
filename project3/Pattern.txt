@@ -1,5 +1,3 @@
-&Project GutenBerg&
-&seems to me I view mankind&
 &quick brown fox&
-&O happy dagger!
-This is thy sheath; there rust, and let me die.&
+&seems to me I view mankind&
+&Project GutenBerg&

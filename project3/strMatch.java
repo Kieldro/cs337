@@ -28,13 +28,12 @@ public class strMatch{
 	
 	public static void main(String[] args) throws Exception
 	{   
-		double endTime, elapsedTime, startTime = System.currentTimeMillis();
-		System.out.println("startTime: " + startTime + " ms");
+		long endTime, elapsedTime, startTime = System.currentTimeMillis();
 		try {
 			patternFile = new File(args[0]);
 			sourceFile = new File(args[1]);
 			outFile = new File(args[2]);
-			out = new PrintWriter(new FileWriter(outFile)); 
+			out = new PrintWriter(new FileWriter(outFile));
 			boolean found = false;
 			String result = "";
 
@@ -47,7 +46,7 @@ public class strMatch{
 			String pattern = sc.next();
 			//if(DEBUG) System.out.println("pattern: \"" + pattern + '"');
 
-			output("BF", pattern);
+//			output("BF", pattern);
 			output("RK", pattern);
 //			output("KMP", pattern);
 //			output("BM", pattern);
@@ -63,6 +62,7 @@ public class strMatch{
 
 	static void output(String alg, String pattern) throws Exception{
 		boolean found = false;
+		long end, elapsed, start = System.currentTimeMillis();
 
 		if(pattern.equals(""))		// empty string pattern
 			found = true;
@@ -78,7 +78,11 @@ public class strMatch{
 			found = BM(pattern);
 
 		String result = found ? "PASSED" : "FAILED";
-		out.println(alg + " " + result + ": " + pattern);
+		System.out.println(alg + " " + result + ": " + pattern);
+		
+		end = System.currentTimeMillis();
+		elapsed = end - start;
+		System.out.println(alg + " elapsed: " + elapsed + " ms");
 	}
 
 	// Brute Force method
@@ -96,7 +100,7 @@ public class strMatch{
 		}
 
 		for(int i = pLen; i < sourceFile.length()-pLen; ++i){
-			if(DEBUG) System.out.println("s:    \"" + s + '"');
+			//if(DEBUG) System.out.println("s:    \"" + s + '"');
 			newChar = (char)in.read();
 			s += newChar;		// update substrings
 			s = s.substring(1, pLen+1);
@@ -130,10 +134,10 @@ public class strMatch{
 		while(s.length() < pLen) {
 			s += (char)in.read();
 		}
-		sHash = hashFunc ? hash(pattern): hashBase(pattern);
+		sHash = hashFunc ? hash(s): hashBase(s);
 
 		for(int i = pLen; i < sourceFile.length()-pLen; ++i){
-			if(DEBUG) System.out.println("s:    \"" + s + '"');
+			//if(DEBUG) System.out.println("s:    \"" + s + '"');
 			newChar = (char)in.read();
 			sHash = hash(s, sHash, newChar);		// update hash
 			s += newChar;		// update substrings
@@ -192,8 +196,8 @@ public class strMatch{
 		int result = prevHash;
 
 		result -= s.charAt(0) * Math.pow(256, s.length() );
-		result += newChar;
 		result *= 256;
+		result += newChar;
 
 		return result;
 	}
