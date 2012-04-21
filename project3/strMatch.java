@@ -48,7 +48,7 @@ public class strMatch{
 
 //			output("BF", pattern);
 			output("RK", pattern);
-//			output("KMP", pattern);
+			output("KMP", pattern);
 //			output("BM", pattern);
 			}
 		}finally {
@@ -228,9 +228,85 @@ public class strMatch{
 		return true;
 	}
 
-	public static boolean KMP(String pattern) throws Exception{
-		System.out.println("KMP not implemented!");
-		return false;
+	public static int[] preCompute(String pattern) {
+		int m = pattern.length();
+		char[] p = new char[m +1];
+		int[] f = new int[m+1];
+		
+		for (int i = 0; i < pattern.length(); ++i) {
+		 	p[i+1] = pattern.charAt(i);
+		}
+		f[0] = 0;
+		f[1] = 0;
+		
+	for (int j = 2; j<=m; ++j) {
+		int k = f[j-1];
+		while (k>0 && p[j] != p[k+1]) {
+			k = f[k];
+		}
+		if (k==0 && p[j] != p[k+1])
+			f[j] =0;
+		else
+			f[j] = k +1;
+		
+	}
+	return f;
+	}
+
+	public static boolean KMP(String p) throws Exception{
+			final int pLen = p.length();
+			int[] a = preCompute(p);
+			BufferedReader in = new BufferedReader(new FileReader(sourceFile));
+			String s = "";
+			char newChar = 0;
+			//if(DEBUG) System.out.println("newChar:    \"" + newChar + '"');
+			assert(sourceFile.length() >= pLen) : "Pattern too large for file.";
+		
+		
+		//    /*
+		// 	for(int i = pLen; i < sourceFile.length()-pLen; ++i){
+		// 		if(DEBUG) System.out.println("s:    \"" + s + '"');
+		// 		newChar = (char)in.read();
+		// 		s += newChar;		// update substrings
+		// 		s = s.substring(1, pLen+1);
+		// 		for(int j = 0; j < pLen; ++j){
+		// 			if(s.charAt(j) != pattern.charAt(j) )
+		// 				break;		// don't check rest of string
+		// 			if(j == pLen-1 )		// all chars matched
+		// 				return true;
+		// 		}
+		// 	}
+		// */
+		// 
+			// while(s.length() < pLen) {
+			// 	s += (char)in.read();
+			// }
+			int r =0;
+			int l = 0;
+			for (int i = 0; i < sourceFile.length(); ++i) {
+
+				
+				newChar = (char) in.read();
+				s += newChar;
+				if (s.charAt(r) == p.charAt(r) && r == p.length()-1){
+					System.out.println("YOU FOUND IT!");
+					return true;
+				}
+				if (s.charAt(r)==p.charAt(r)) {
+					r++;
+				}
+				else if (s.charAt(r)!=p.charAt(r) && (r==0)) {
+					s="";
+				}
+				else if (s.charAt(r)!=p.charAt(r) && r>0) {
+					System.out.println(s.length()- a[s.length()-1]);
+					s = s.substring(s.length()- a[s.length()-1]);
+					r=a[s.length()-1];
+			}
+			}
+		
+			in.close();
+	return false;
 	}
 }
 	// 	// char[] p = pattern.toCharArray();
