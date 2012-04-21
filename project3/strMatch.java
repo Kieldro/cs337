@@ -262,36 +262,15 @@ public class strMatch{
 			//if(DEBUG) System.out.println("newChar:    \"" + newChar + '"');
 			assert(sourceFile.length() >= pLen) : "Pattern too large for file.";
 		
-		
-		//    /*
-		// 	for(int i = pLen; i < sourceFile.length()-pLen; ++i){
-		// 		if(DEBUG) System.out.println("s:    \"" + s + '"');
-		// 		newChar = (char)in.read();
-		// 		s += newChar;		// update substrings
-		// 		s = s.substring(1, pLen+1);
-		// 		for(int j = 0; j < pLen; ++j){
-		// 			if(s.charAt(j) != pattern.charAt(j) )
-		// 				break;		// don't check rest of string
-		// 			if(j == pLen-1 )		// all chars matched
-		// 				return true;
-		// 		}
-		// 	}
-		// */
-		// 
-			// while(s.length() < pLen) {
-			// 	s += (char)in.read();
-			// }
 			int r =0;
-			int l = 0;
 			for (int i = 0; i < sourceFile.length(); ++i) {
-
 				
 				newChar = (char) in.read();
 				s += newChar;
 				if (s.charAt(r) == p.charAt(r) && r == p.length()-1){
-					System.out.println("YOU FOUND IT!");
 					return true;
 				}
+				
 				if (s.charAt(r)==p.charAt(r)) {
 					r++;
 				}
@@ -299,10 +278,10 @@ public class strMatch{
 					s="";
 				}
 				else if (s.charAt(r)!=p.charAt(r) && r>0) {
-					System.out.println(s.length()- a[s.length()-1]);
-					s = s.substring(s.length()- a[s.length()-1]);
 					r=a[s.length()-1];
+					s = s.substring(s.length()- a[s.length()-1]);
 			}
+			
 			}
 		
 			in.close();
