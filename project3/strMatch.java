@@ -14,6 +14,7 @@ Total time 11 hrs, 8 hrs of pair programing
 
 NOTES:
 run with: source runTest.sh
+time grep Project GutenBerg sampleSource.txt = 29.039 s
 
 */
 import java.io.*;		// for File
