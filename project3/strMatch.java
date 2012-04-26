@@ -53,13 +53,13 @@ public class strMatch{
 			sc.useDelimiter("&\n?&?");
 
 			while(sc.hasNext() ){		// run for each pattern
-				// find pattern
+			// find pattern
 			String pattern = sc.next();
-			//if(DEBUG) System.out.println("pattern: \"" + pattern + '"');
+			if(DEBUG) System.out.println("pattern: \"" + pattern + '"');
 
-//			output(Algorithm.BF, pattern);
+			output(Algorithm.BF, pattern);
 //			output(Algorithm.RK, pattern);
-			output(Algorithm.KMP, pattern);
+//			output(Algorithm.KMP, pattern);
 //			output(Algorithm.BM, pattern);
 			}
 		}finally {
