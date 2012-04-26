@@ -48,7 +48,7 @@ public class strMatch{
 			//if(DEBUG) System.out.println("pattern: \"" + pattern + '"');
 
 //			output("BF", pattern);
-			output("RK", pattern);
+//			output("RK", pattern);
 			output("KMP", pattern);
 //			output("BM", pattern);
 			}
