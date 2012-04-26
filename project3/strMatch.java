@@ -27,6 +27,16 @@ public class strMatch{
 	static File outFile;
 	static PrintWriter out = null;
 	
+	public static enum Algorithm{
+		BF("BF"), RK("RK"), KMP("KMP"), BM("BM");
+		
+		String str;
+		
+		Algorithm(String s){
+			str = s;
+		}
+	}
+	
 	public static void main(String[] args) throws Exception
 	{   
 		long endTime, elapsedTime, startTime = System.currentTimeMillis();
@@ -47,10 +57,10 @@ public class strMatch{
 			String pattern = sc.next();
 			//if(DEBUG) System.out.println("pattern: \"" + pattern + '"');
 
-//			output("BF", pattern);
-//			output("RK", pattern);
-			output("KMP", pattern);
-//			output("BM", pattern);
+//			output(Algorithm.BF, pattern);
+//			output(Algorithm.RK, pattern);
+			output(Algorithm.KMP, pattern);
+//			output(Algorithm.BM, pattern);
 			}
 		}finally {
 			out.close();
@@ -61,29 +71,29 @@ public class strMatch{
 		}
 	}
 
-	static void output(String alg, String pattern) throws Exception{
+	static void output(Algorithm alg, String pattern) throws Exception{
 		boolean found = false;
 		long end, elapsed, start = System.currentTimeMillis();
 
-		if(pattern.equals(""))		// empty string pattern
+		if(pattern.length() == 0)		// empty string pattern
 			found = true;
 		else if(sourceFile.length() < pattern.length() )		// source text too small
 			found = false;
-		else if(alg.equals("BF") )
+		else if(alg == Algorithm.BF )
 			found = BF(pattern);
-		else if(alg.equals("RK") )
+		else if(alg == Algorithm.RK)
 			found = RK(pattern);
-		else if(alg.equals("KMP") )
+		else if(alg == Algorithm.KMP)
 			found = KMP(pattern);
-		else if(alg.equals("BM") )
+		else if(alg == Algorithm.BM)
 			found = BM(pattern);
 
 		String result = found ? "PASSED" : "FAILED";
-		System.out.println(alg + " " + result + ": " + pattern);
+		System.out.println(alg.str + " " + result + ": " + pattern);
 		
 		end = System.currentTimeMillis();
 		elapsed = end - start;
-		System.out.println(alg + " elapsed: " + elapsed + " ms");
+		System.out.println(alg.str + " elapsed: " + elapsed + " ms");
 	}
 
 	// Brute Force method
