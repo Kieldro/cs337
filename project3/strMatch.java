@@ -63,15 +63,15 @@ public class strMatch{
 
 			while(sc.hasNext() ){		// run for each pattern
 				FileInputStream sif = new FileInputStream(sourceFile); //we need to reset the bytes read in for each call.
-				sourceInputStream = new DataInputStream(sif);
-				readBytes();
-				
-				// find pattern
+			sourceInputStream = new DataInputStream(sif);
+			readBytes();
+
+			// find pattern
 			String pattern = sc.next();
 			//if(DEBUG) System.out.println("pattern: \"" + pattern + '"');
 
-						output(Algorithm.BF, pattern);
-						output(Algorithm.RK, pattern);
+			output(Algorithm.BF, pattern);
+			output(Algorithm.RK, pattern);
 			output(Algorithm.KMP, pattern);
 			//			output(Algorithm.BM, pattern);
 		}
@@ -121,20 +121,23 @@ static void output(Algorithm alg, String pattern) throws Exception{
 // Brute Force method
 public static boolean BF(String pattern) throws Exception{
 	final int pLen = pattern.length();
-	BufferedReader in = new BufferedReader(new FileReader(sourceFile));
 	String s = "$"; // initialized to dummy char that will be removed later
 	char newChar = 0;
 	//if(DEBUG) System.out.println("newChar:    \"" + newChar + '"');
-	assert(sourceFile.length() >= pLen) : "Pattern too large for file.";
+	assert(offset >= pLen) : "Pattern too large for file.";
 
 	// initialize s
+	int z =0;
 	while(s.length() < pLen) {
-		s += (char)in.read();
+		s += (char)b[z];
+		z++;
 	}
 
-	for(int i = pLen; i < sourceFile.length()-pLen; ++i){
+	for(int i = pLen; i < offset; ++i){
+		if (b[i]==0)
+			break; //FRONTGUARD
 		//if(DEBUG) System.out.println("s:    \"" + s + '"');
-		newChar = (char)in.read();
+		newChar = (char)b[i];
 		s += newChar;		// update substrings
 		s = s.substring(1, pLen+1);
 		for(int j = 0; j < pLen; ++j){
@@ -143,9 +146,11 @@ public static boolean BF(String pattern) throws Exception{
 			if(j == pLen-1 )		// all chars matched
 				return true;
 		}
+
+		if ((i==offset-1) && readBytes()) //BACKGUARD
+			i=-1;
 	}
 
-	in.close();
 
 	return false;
 }
@@ -154,24 +159,28 @@ public static boolean BF(String pattern) throws Exception{
 public static boolean RK(String pattern) throws Exception{
 	final int pLen = pattern.length();
 	boolean hashFunc = true;		// set to true for simple hash function
-	BufferedReader in = new BufferedReader(new FileReader(sourceFile));
 	String s = "$"; // initialized to dummy char that will be removed later
 	int patternHash = hashFunc ? hash(pattern): hashBase(pattern);
 	int sHash = 0;
 	char newChar = 0;
 	//if(DEBUG) System.out.println("newChar:    \"" + newChar + '"');
 	if(DEBUG) System.out.println("hash(pattern):    \"" + patternHash + '"');
-	assert(sourceFile.length() >= pLen) : "Pattern too large for file.";
+	assert(offset >= pLen) : "Pattern too large for file.";
 
 	// initialize s
+	int z=0;
 	while(s.length() < pLen) {
-		s += (char)in.read();
+		s += (char)b[z];
+		z++;
 	}
 	sHash = hashFunc ? hash(s): hashBase(s);
 
-	for(int i = pLen; i < sourceFile.length()-pLen; ++i){
+	for(int i = pLen; i < offset; ++i){
+		if (b[i]==0)
+			break; //FRONTGUARD
+
 		//if(DEBUG) System.out.println("s:    \"" + s + '"');
-		newChar = (char)in.read();
+		newChar = (char)b[i];
 		sHash = hash(s, sHash, newChar);		// update hash
 		s += newChar;		// update substrings
 		s = s.substring(1, pLen+1);
@@ -186,9 +195,11 @@ public static boolean RK(String pattern) throws Exception{
 					return true;
 			}
 		}
+		
+		if ((i==offset-1) && readBytes()) //BACKGUARD
+			i=-1;
 	}
 
-	in.close();
 
 	return false;
 }
@@ -324,7 +335,7 @@ public static boolean KMP(String p) throws Exception{
 	}
 
 	return false;
-   }
+}
 }
 // 	// char[] p = pattern.toCharArray();
 // 	// char[] t = sourceFile.getCharacters();
