@@ -29,7 +29,7 @@ public class strMatch{
 	static PrintWriter out = null;
 	static final int TWENTYFIVE_MB = 26214400;
 	static byte[] b = new byte[TWENTYFIVE_MB];
-	static int offset; //tells us how far to read into the byte array.
+	static int numBytesRead; //tells us how far to read into the byte array.
 
 	public static enum Algorithm{
 		BF("BF"), RK("RK"), KMP("KMP"), BM("BM");
@@ -59,7 +59,7 @@ public class strMatch{
 
 			// input
 			Scanner sc = new Scanner(patternFile);
-			sc.useDelimiter("&\n?&?");
+			sc.useDelimiter("(&\n&)|&");
 
 			while(sc.hasNext() ){		// run for each pattern
 				FileInputStream sif = new FileInputStream(sourceFile); //we need to reset the bytes read in for each call.
@@ -82,13 +82,24 @@ public class strMatch{
 			elapsedTime = endTime - startTime;
 			System.out.println("main() elapsedTime: " + elapsedTime + " ms");
 		}
-}
+	}
 
 	static boolean readBytes() throws Exception {
-		offset = sourceInputStream.read(b,0,TWENTYFIVE_MB);
-		// System.out.println("Read Bytes Called. offset: " + offset);
+		b = new byte[TWENTYFIVE_MB];
+		numBytesRead = sourceInputStream.read(b,0,TWENTYFIVE_MB);
+		if (numBytesRead==-1) //can no longer read any more bytes.  I create a new input stream so that it's ready for the next call and to reset the numBytesRead to a positive value.  	
+			return false;
+		return true;
+	}
 
-		if (offset==-1) //can no longer read any more bytes.  I create a new input stream so that it's ready for the next call and to reset the offset to a positive value.  	
+	static boolean readBytes(int offset, byte[] c) throws Exception {
+		b = new byte[offset + TWENTYFIVE_MB];  
+		for (int i =0; i < offset; i++){
+			//copy in values from passed in array
+			b[i] = c[i];
+		}
+		numBytesRead = sourceInputStream.read(b,offset,TWENTYFIVE_MB) + offset;
+		if (numBytesRead==-1) //can no longer read any more bytes.  I create a new input stream so that it's ready for the next call and to reset the numBytesRead to a positive value.  	
 			return false;
 		return true;
 	}
@@ -124,7 +135,7 @@ public class strMatch{
 		String s = "$"; // initialized to dummy char that will be removed later
 		char newChar = 0;
 		//if(DEBUG) System.out.println("newChar:    \"" + newChar + '"');
-		assert(offset >= pLen) : "Pattern too large for file.";
+		assert(numBytesRead >= pLen) : "Pattern too large for file.";
 
 		// initialize s
 		int z =0;
@@ -133,7 +144,7 @@ public class strMatch{
 			z++;
 		}
 
-		for(int i = pLen; i < offset; ++i){
+		for(int i = pLen; i < numBytesRead; ++i){
 			if (b[i]==0)
 				break; //FRONTGUARD
 			//if(DEBUG) System.out.println("s:    \"" + s + '"');
@@ -147,7 +158,7 @@ public class strMatch{
 					return true;
 			}
 
-			if ((i==offset-1) && readBytes()) //BACKGUARD
+			if ((i==numBytesRead-1) && readBytes()) //BACKGUARD
 				i=-1;
 		}
 
@@ -165,7 +176,7 @@ public class strMatch{
 		char newChar = 0;
 		//if(DEBUG) System.out.println("newChar:    \"" + newChar + '"');
 		if(DEBUG) System.out.println("hash(pattern):    \"" + patternHash + '"');
-		assert(offset >= pLen) : "Pattern too large for file.";
+		assert(numBytesRead >= pLen) : "Pattern too large for file.";
 
 		// initialize s
 		int z=0;
@@ -175,7 +186,7 @@ public class strMatch{
 		}
 		sHash = hashFunc ? hash(s): hashBase(s);
 
-		for(int i = pLen; i < offset; ++i){
+		for(int i = pLen; i < numBytesRead; ++i){
 			if (b[i]==0)
 				break; //FRONTGUARD
 
@@ -196,10 +207,9 @@ public class strMatch{
 				}
 			}
 		
-			if ((i==offset-1) && readBytes()) //BACKGUARD
+			if ((i==numBytesRead-1) && readBytes()) //BACKGUARD
 				i=-1;
 		}
-
 
 		return false;
 	}
@@ -245,13 +255,7 @@ public class strMatch{
 
 		return result;
 	}
-
-
-	public static boolean BM(String pattern) throws Exception{
-		System.out.println("BM not implemented!");
-		return false;
-	}
-
+	
 	public static long exponentiation(long a, long b, long n){
 		long c = 1;
 		while(b > 0){
@@ -263,7 +267,6 @@ public class strMatch{
 		return c % n;
 	}
 
-
 	// Returns true if x is prime.
 	public static boolean isPrime(long x){
 		if(x % 2 == 0) return false;
@@ -272,7 +275,7 @@ public class strMatch{
 		return true;
 	}
 
-	public static int[] preCompute(String pattern) {
+	public static int[] computeCores(String pattern) {
 		int m = pattern.length();
 		char[] p = new char[m +1];
 		int[] f = new int[m+1];
@@ -299,14 +302,14 @@ public class strMatch{
 
 	public static boolean KMP(String p) throws Exception{
 		final int pLen = p.length();
-		int[] a = preCompute(p);
+		int[] a = computeCores(p);
 		String s = "";
 		char newChar = 0;
 		//if(DEBUG) System.out.println("newChar:    \"" + newChar + '"');
-		assert(offset >= pLen) : "Pattern too large for file.";
+		assert(numBytesRead >= pLen) : "Pattern too large for file.";
 
 		int r =0;
-		for (int i = 0; i < offset; ++i) {
+		for (int i = 0; i < numBytesRead; ++i) {
 			if (b[i]==0)
 				break;  //we add this guard.  it tells us that no byte has been read into this location, and so we are done with the array.
 
@@ -330,27 +333,93 @@ public class strMatch{
 			}
 
 
-			if ((i==offset-1) && readBytes())
+			if ((i==numBytesRead-1) && readBytes())
 				i=-1;   //this resets us in the for loop.  we set it to -1 b/c ++i will increment it back to 0.
 		}
 
 		return false;
 	}
+	
+	static int[] badSymbol(String pattern) {
+		char[] p = pattern.toCharArray();
+		int[] rt = new int[128];
+		for (int i=0; i < rt.length; ++i) {
+			rt[i]=-1;
+		}	
+
+		for (int i =0; i < p.length; ++i) {
+			rt[(int)p[i]] =  i;
+		}
+
+		return rt;
+	}
+
+	static int[] goodSuffix(String pattern, int[] f) {
+		char[] p = pattern.toCharArray();
+		int initVal= p.length - f[p.length];
+		int[] s = new int[p.length + 1];
+
+		//initialize array to the |p|-|c(p)|
+		for (int i = 0 ; i< s.length; ++i) {
+			s[i] = initVal;
+		}
+		s[0] =1; //it's always 1 for epsilon case
+		int coreLength = 0;
+		int formula = 0;
+		for (int i = 1; i<s.length; ++i) {
+			//get core of string.
+			coreLength = f[i];
+			formula = i-coreLength; //|v| - |c(v)|
+			// System.out.println("formula: " + formula);
+			if (formula<s[coreLength])
+				s[coreLength] = formula;
+		}
+		return s;
+	}
+
+	static boolean BM(String pattern) throws Exception{
+		char[] p = pattern.toCharArray();
+		//precomputations
+		int[] rt = badSymbol(pattern);
+		int[] f = computeCores(pattern);//1-indexed
+		int[] s = goodSuffix (pattern, f);
+
+		//SUFFIX ARRAY NEEDED
+
+		int j = p.length;
+		int l = 0;
+		int old_l=0;
+
+		while (l<=(numBytesRead-p.length)) { //do i need to subtract the length of p??
+			while (/*(l+j-1) < numBytesRead &&*/ j>0 && p[j-1] == b[l+j-1]) {
+				j--;
+			}
+			if (j==0)
+				return true;
+			else {
+				old_l=l;
+				l += Math.max(j-1-rt[(int)b[l+j-1]], s[p.length-j]);				
+			}
+
+			//the following is our guard for reading in more bytes. It's complicated by the fact 
+			//that I might need to keep characters from the previous byte of arrays before reading in more. 
+			if (l==numBytesRead && readBytes()) {
+				l=0;
+				j= p.length;
+			}
+			else if (l >(numBytesRead-p.length) && l<numBytesRead) {
+				int offset = numBytesRead-l;
+				byte[] c = new byte[offset];
+				for (int i =0; i < offset; ++i) {
+					c[i] = b[l];
+					l++;
+				}
+				if (readBytes(offset, c) ) { //reset the values
+					l=0;
+					j = p.length;
+				}
+			}
+		}
+		return false;
+	}
 }
-// 	// char[] p = pattern.toCharArray();
-// 	// char[] t = sourceFile.getCharacters();
-// 	// 
-// 	// int l=0;
-// 	// int r=0;		
-// 	// for(int i = 0; i < t.length; ++i){
-	// 		// 	if (t[r]==p[r-l])
-	// 		// 		r++;
-	// 		// 	else if (t[r]!= p[r-l] && r==l) {
-		// 			// 		l++;
-		// 			// 		r++;}
-		// 			// 		else if (t[r]!= p[r-l] && r>l) {
-			// 				// 			l = computeCore();
-			// 				// 		}
-			// 				// 	}
-			// 				// }
-			// 			

@@ -1,9 +1,4 @@
-&&
 &quick brown fox&
-&&
 &nothing&
-&&
-&&
 &bro
 wn&
-&&
