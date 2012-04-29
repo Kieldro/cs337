@@ -27,8 +27,8 @@ public class strMatch{
 	static DataInputStream sourceInputStream;
 	static File outFile;
 	static PrintWriter out = null;
-	static final int TWENTYFIVE_MB = 26214400;
-	static byte[] b = new byte[TWENTYFIVE_MB];
+	static final int TWENTYFIVE_MiB = 25 * (int)Math.pow(2, 10);
+	static byte[] b = new byte[TWENTYFIVE_MiB];
 	static int numBytesRead; //tells us how far to read into the byte array.
 
 	public static enum Algorithm{
@@ -71,7 +71,7 @@ public class strMatch{
 				if(DEBUG) System.out.println("pattern: \"" + pattern + '"');
 
 				output(Algorithm.BF, pattern);
-	//			output(Algorithm.RK, pattern);
+				output(Algorithm.RK, pattern);
 	//			output(Algorithm.KMP, pattern);
 	//			output(Algorithm.BM, pattern);
 			}
@@ -85,20 +85,23 @@ public class strMatch{
 	}
 
 	static boolean readBytes() throws Exception {
-		b = new byte[TWENTYFIVE_MB];
-		numBytesRead = sourceInputStream.read(b,0,TWENTYFIVE_MB);
-		if (numBytesRead==-1) //can no longer read any more bytes.  I create a new input stream so that it's ready for the next call and to reset the numBytesRead to a positive value.  	
+		b = new byte[TWENTYFIVE_MiB];
+		numBytesRead = sourceInputStream.read(b,0,TWENTYFIVE_MiB);
+		// can no longer read any more bytes.
+		// I create a new input stream so that it's ready for the next call
+		// and to reset the numBytesRead to a positive value.  	
+		if (numBytesRead==-1)
 			return false;
 		return true;
 	}
 
 	static boolean readBytes(int offset, byte[] c) throws Exception {
-		b = new byte[offset + TWENTYFIVE_MB];  
+		b = new byte[offset + TWENTYFIVE_MiB];  
 		for (int i =0; i < offset; i++){
 			//copy in values from passed in array
 			b[i] = c[i];
 		}
-		numBytesRead = sourceInputStream.read(b,offset,TWENTYFIVE_MB) + offset;
+		numBytesRead = sourceInputStream.read(b,offset,TWENTYFIVE_MiB) + offset;
 		if (numBytesRead==-1) //can no longer read any more bytes.  I create a new input stream so that it's ready for the next call and to reset the numBytesRead to a positive value.  	
 			return false;
 		return true;
@@ -162,7 +165,6 @@ public class strMatch{
 				i=-1;
 		}
 
-
 		return false;
 	}
 
@@ -175,7 +177,7 @@ public class strMatch{
 		int sHash = 0;
 		char newChar = 0;
 		//if(DEBUG) System.out.println("newChar:    \"" + newChar + '"');
-		if(DEBUG) System.out.println("hash(pattern):    \"" + patternHash + '"');
+		//if(DEBUG) System.out.println("hash(pattern):    \"" + patternHash + '"');
 		assert(numBytesRead >= pLen) : "Pattern too large for file.";
 
 		// initialize s

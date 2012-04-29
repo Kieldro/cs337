@@ -1,4 +1,2 @@
-&quick brown fox&
 &nothing&
-&bro
-wn&
+&quick brown fox&

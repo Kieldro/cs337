@@ -1,6 +1,6 @@
 # file variables
-pattern="Pattern.txt"
-source="Source.txt"
+pattern="biblePattern.txt"
+source="bible.txt"
 outFile="results.txt"
 
 echo COMPILING...
@@ -10,4 +10,4 @@ echo EXECTUTING...
 java -ea strMatch $pattern $source $outFile
 
 #echo GREP...
-#time grep Project GutenBerg sampleSource.txt
+#time grep Project GutenBerg $source
