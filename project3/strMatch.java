@@ -25,14 +25,14 @@ import java.util.*;		// for scanner
 
 public class strMatch{
 	final static boolean DEBUG = true;
-	final static boolean TIME = false;		// set to true for performance info
+	final static boolean TIME = true;		// set to true for performance info
 	static File patternFile;
 	static File sourceFile;
 	static DataInputStream sourceInputStream;
 	static File outFile;
 	static PrintWriter out = null;
-	static final int TWENTYFIVE_MiB = 25 *4;//* (int)Math.pow(2, 20);
-	static byte[] b = new byte[TWENTYFIVE_MiB];
+	static final int NUM_BYTES = 25 * (int)Math.pow(2, 20);		// 25 MiB (mebibytes)
+	static byte[] b = new byte[NUM_BYTES];
 	static int numBytesRead; //tells us how far to read into the byte array.
 
 	public static enum Algorithm{
@@ -70,10 +70,10 @@ public class strMatch{
 				
 				// run algorithms
 				int rLen = 0;
-				results[rlen] = output(Algorithm.BF, pattern); ++rLen;
-				results[rlen] = output(Algorithm.RK, pattern); ++rLen;
-				results[rlen] = output(Algorithm.KMP, pattern); ++rLen;
-//				results[rlen] = output(Algorithm.BM, pattern); ++rLen;
+				results[rLen] = output(Algorithm.BF, pattern); ++rLen;
+				results[rLen] = output(Algorithm.RK, pattern); ++rLen;
+				results[rLen] = output(Algorithm.KMP, pattern); ++rLen;
+//				results[rLen] = output(Algorithm.BM, pattern); ++rLen;
 				
 				// check that all algorithms returned same result
 				boolean sameValue = true;
@@ -113,7 +113,7 @@ public class strMatch{
 		else if(alg == Algorithm.BM)
 			found = BM(pattern);
 
-		String result = found ? "PASSED" : "FAILED";
+		String result = found ? "MATCHED" : "FAILED";
 		System.out.println(alg.str + " " + result + ": " + pattern);
 
 		end = System.currentTimeMillis();
@@ -123,10 +123,10 @@ public class strMatch{
 		return found;
 	}
 
-	// input functions
+	// Input functions
 	static boolean readBytes() throws Exception {
-		b = new byte[TWENTYFIVE_MiB];
-		numBytesRead = sourceInputStream.read(b,0,TWENTYFIVE_MiB);
+		b = new byte[NUM_BYTES];
+		numBytesRead = sourceInputStream.read(b, 0, NUM_BYTES);
 		// can no longer read any more bytes.
 		// I create a new input stream so that it's ready for the next call
 		// and to reset the numBytesRead to a positive value.  	
@@ -136,12 +136,12 @@ public class strMatch{
 	}
 
 	static boolean readBytes(int offset, byte[] c) throws Exception {
-		b = new byte[offset + TWENTYFIVE_MiB];  
+		b = new byte[offset + NUM_BYTES];  
 		for (int i =0; i < offset; i++){
 			//copy in values from passed in array
 			b[i] = c[i];
 		}
-		numBytesRead = sourceInputStream.read(b,offset,TWENTYFIVE_MiB) + offset;
+		numBytesRead = sourceInputStream.read(b,offset,NUM_BYTES) + offset;
 		if (numBytesRead==-1) //can no longer read any more bytes.  I create a new input stream so that it's ready for the next call and to reset the numBytesRead to a positive value.  	
 			return false;
 		return true;
@@ -150,13 +150,13 @@ public class strMatch{
 	// Brute Force method
 	public static boolean BF(String pattern) throws Exception{
 		final int P_LEN = pattern.length();
-		String alignment = "$"; // initialized to dummy char that will be removed later
+		StringBuilder alignment = new StringBuilder("$"); // initialized to dummy char that will be removed later
 		char newChar = 0;
 		assert(numBytesRead >= P_LEN) : "Pattern too large for file.";
 
 		// initialize s
 		for(int i = 0; alignment.length() < P_LEN; ++i)
-			alignment += (char)b[i];
+			alignment.append((char)b[i]);		// StringBuidler
 		
 		//if(DEBUG) System.out.println("initalign: \"" + alignment + '"');
 		assert(b.length > 0): "Char array b is empty";
@@ -165,8 +165,8 @@ public class strMatch{
 				"Text contains characters with ascii values > 127: "+(int)newChar;
 			newChar = (char)b[i];
 			//if(DEBUG) System.out.println("newChar:   \"" + newChar + '"');
-			alignment = alignment.substring(1, P_LEN);
-			alignment += newChar;		// update substrings
+			alignment.deleteCharAt(0);
+			alignment.append(newChar);		// StringBuidler
 			//if(DEBUG) System.out.println("alignment: \"" + alignment + '"');
 			for(int j = 0; j < P_LEN; ++j){
 				if(alignment.charAt(j) != pattern.charAt(j) )
@@ -185,17 +185,17 @@ public class strMatch{
 	// Rabin-Karp
 	public static boolean RK(String pattern) throws Exception{
 		final int P_LEN = pattern.length();
-		String alignment = "$"; // initialized to dummy char that will be removed later
+		StringBuilder alignment = new StringBuilder("$"); // initialized to dummy char that will be removed later
 		char newChar = 0;
 		//if(DEBUG) System.out.println("newChar:    \"" + newChar + '"');
 		//if(DEBUG) System.out.println("hash(pattern):    \"" + patternHash + '"');
 		assert(numBytesRead >= P_LEN) : "Pattern too large for file.";
 		// initialize s
 		for(int i = 0; alignment.length() < P_LEN; ++i)
-			alignment += (char)b[i];
+			alignment.append((char)b[i]);
 		
 		boolean hashFunc = true;		// set to true for simple hash function
-		int patternHash = hashFunc ? hash(pattern): hashBase(pattern);
+		int patternHash = hashFunc ? hash(new StringBuilder(pattern) ): hashBase(new StringBuilder(pattern) );
 		int alignHash = hashFunc ? hash(alignment): hashBase(alignment);
 
 		for(int i = P_LEN-1; i < numBytesRead; ++i){
@@ -204,9 +204,10 @@ public class strMatch{
 
 			//if(DEBUG) System.out.println("s:    \"" + s + '"');
 			newChar = (char)b[i];
-			alignHash = hash(alignment, alignHash, newChar);		// update hash
-			alignment += newChar;
-			alignment = alignment.substring(1, P_LEN+1);
+			alignHash = hashFunc ? hash(alignment, alignHash, newChar):
+								hashBase(alignment, alignHash, newChar);		// update hash
+			alignment.deleteCharAt(0);
+			alignment.append(newChar);
 
 			//if(DEBUG) System.out.println("alignHash = " + alignHash);
 			if (patternHash == alignHash ){
@@ -219,7 +220,7 @@ public class strMatch{
 				}
 			}
 		
-			if ((i==numBytesRead-1) && readBytes()) //BACKGUARD
+			if ((i==numBytesRead-1) && readBytes() ) //BACKGUARD
 				i=-1;
 		}
 
@@ -227,7 +228,7 @@ public class strMatch{
 	}
 
 	// initial hash: using simple algorithm.
-	static int hash(String s){
+	static int hash(StringBuilder s){
 		int result = 0;
 
 		for(int i = 0; i < s.length(); ++i)
@@ -237,7 +238,7 @@ public class strMatch{
 	}
 
 	// update hash
-	static int hash(String s, int prevHash, char newChar){
+	static int hash(StringBuilder s, int prevHash, char newChar){
 		int result = prevHash;
 
 		result -= s.charAt(0);
@@ -248,7 +249,7 @@ public class strMatch{
 	}
 
 	// initial hash: base 256
-	static int hashBase(String s){
+	static int hashBase(StringBuilder s){
 		int result = 0;
 		int mod = 257;	//31, 127, 518
 
@@ -260,7 +261,7 @@ public class strMatch{
 	}
 
 	// update hash
-	static int hashBase(String s, int prevHash, char newChar){
+	static int hashBase(StringBuilder s, int prevHash, char newChar){
 		int result = prevHash;
 
 		result -= s.charAt(0) * Math.pow(256, s.length() );
@@ -299,7 +300,7 @@ public class strMatch{
 	public static boolean KMP(String pattern) throws Exception{
 		final int P_LEN = pattern.length();
 		int[] a = computeCores(pattern);
-		String alignment = "";
+		StringBuilder alignment = new StringBuilder();
 		char newChar = 0;
 		//if(DEBUG) System.out.println("newChar:    \"" + newChar + '"');
 		assert(numBytesRead >= P_LEN) : "Pattern too large for file.";
@@ -311,7 +312,7 @@ public class strMatch{
 
 
 			newChar = (char) b[i];
-			alignment += newChar;
+			alignment.append(newChar);
 			// System.out.println("i: " + i + "    alignment: " + alignment);
 			if (alignment.charAt(r) == pattern.charAt(r) && r == P_LEN-1){
 				return true;
@@ -321,11 +322,11 @@ public class strMatch{
 				r++;
 			}
 			else if (alignment.charAt(r) != pattern.charAt(r) && (r==0) ) {
-				alignment = "";
+				alignment = new StringBuilder();
 			}
 			else if (alignment.charAt(r) != pattern.charAt(r) && r>0) {
 				r=a[alignment.length()-1];
-				alignment = alignment.substring(alignment.length()- a[alignment.length()-1]);
+				alignment.deleteCharAt(0);
 			}
 
 			if ((i==numBytesRead-1) && readBytes())

@@ -3,7 +3,7 @@ pattern="biblePattern.txt"
 source="bible.txt"
 outFile="results.txt"
 compile=true
-grep=false
+grep=true
 noError=true
 
 if $compile; then
@@ -19,6 +19,6 @@ if $noError; then		# don't exectute if there were compilation errors
 fi
 
 if $grep; then
-	echo GREP...
-	time grep -m 1 '78:25 Man did eat angels' $source
+	echo GREP for string in $source...
+	time grep -nm 1 '78:25 Man did eat angels' $source
 fi

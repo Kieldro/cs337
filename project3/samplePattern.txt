@@ -1,4 +1,2 @@
-$The search string lies here$
-$Can you find this?$
-$Tracking me down is 
-not that easy$
+&The search string lies here&
+&Can you find ThIs?&
