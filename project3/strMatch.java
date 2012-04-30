@@ -47,18 +47,15 @@ public class strMatch{
 
 	public static void main(String[] args) throws Exception
 	{   
-
 		long endTime, elapsedTime, startTime = System.currentTimeMillis();
+		boolean[] results = new boolean[4];
+		
 		try {
 			patternFile = new File(args[0]);
 			sourceFile = new File(args[1]);
-
 			outFile = new File(args[2]);
 			if(DEBUG) System.out.println("sourceFile.length(): " + sourceFile.length());
-			
 			out = new PrintWriter(new FileWriter(outFile));
-			boolean found = false;
-			String result = "";
 
 			// input patterns
 			Scanner sc = new Scanner(patternFile);
@@ -70,13 +67,23 @@ public class strMatch{
 				// find pattern
 				String pattern = sc.next();
 				if(DEBUG) System.out.println("pattern:   \"" + pattern + '"');
-
-				output(Algorithm.BF, pattern);
-				output(Algorithm.RK, pattern);
-				output(Algorithm.KMP, pattern);
-//				output(Algorithm.BM, pattern);
+				
+				// run algorithms
+				int rLen = 0;
+				results[rlen] = output(Algorithm.BF, pattern); ++rLen;
+				results[rlen] = output(Algorithm.RK, pattern); ++rLen;
+				results[rlen] = output(Algorithm.KMP, pattern); ++rLen;
+//				results[rlen] = output(Algorithm.BM, pattern); ++rLen;
+				
+				// check that all algorithms returned same result
+				boolean sameValue = true;
+				for(int i = 0; sameValue && i < rLen-1; ++i)
+					sameValue = sameValue && (results[i] == results[i+1]); 
+				assert (sameValue):
+					"Algorithms returning different results for pattern: " + pattern;
 			}
 		}finally {
+			
 			out.close();
 			
 			endTime = System.currentTimeMillis();
@@ -85,7 +92,7 @@ public class strMatch{
 		}
 	}
 
-	static void output(Algorithm alg, String pattern) throws Exception{
+	static boolean output(Algorithm alg, String pattern) throws Exception{
 		boolean found = false;
 		long end, elapsed, start = System.currentTimeMillis();
 		//we need to reset the bytes read in for each call.
@@ -112,8 +119,11 @@ public class strMatch{
 		end = System.currentTimeMillis();
 		elapsed = end - start;
 		if(TIME) System.out.println(alg.str + " elapsed: " + elapsed + " ms");
+		
+		return found;
 	}
 
+	// input functions
 	static boolean readBytes() throws Exception {
 		b = new byte[TWENTYFIVE_MiB];
 		numBytesRead = sourceInputStream.read(b,0,TWENTYFIVE_MiB);
@@ -286,10 +296,10 @@ public class strMatch{
 	}
 
 	// Knuth-Morris-Pratt
-	public static boolean KMP(String p) throws Exception{
-		final int P_LEN = p.length();
-		int[] a = computeCores(p);
-		String s = "";
+	public static boolean KMP(String pattern) throws Exception{
+		final int P_LEN = pattern.length();
+		int[] a = computeCores(pattern);
+		String alignment = "";
 		char newChar = 0;
 		//if(DEBUG) System.out.println("newChar:    \"" + newChar + '"');
 		assert(numBytesRead >= P_LEN) : "Pattern too large for file.";
@@ -301,21 +311,21 @@ public class strMatch{
 
 
 			newChar = (char) b[i];
-			s += newChar;
-			// System.out.println("i: " + i + "    s: " + newChar);
-			if (s.charAt(r) == p.charAt(r) && r == p.length()-1){
+			alignment += newChar;
+			// System.out.println("i: " + i + "    alignment: " + alignment);
+			if (alignment.charAt(r) == pattern.charAt(r) && r == P_LEN-1){
 				return true;
 			}
 
-			if (s.charAt(r)==p.charAt(r)) {
+			if (alignment.charAt(r) == pattern.charAt(r) ) {
 				r++;
 			}
-			else if (s.charAt(r)!=p.charAt(r) && (r==0)) {
-				s="";
+			else if (alignment.charAt(r) != pattern.charAt(r) && (r==0) ) {
+				alignment = "";
 			}
-			else if (s.charAt(r)!=p.charAt(r) && r>0) {
-				r=a[s.length()-1];
-				s = s.substring(s.length()- a[s.length()-1]);
+			else if (alignment.charAt(r) != pattern.charAt(r) && r>0) {
+				r=a[alignment.length()-1];
+				alignment = alignment.substring(alignment.length()- a[alignment.length()-1]);
 			}
 
 			if ((i==numBytesRead-1) && readBytes())
