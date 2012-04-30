@@ -139,13 +139,13 @@ public class strMatch{
 	// Brute Force method
 	public static boolean BF(String pattern) throws Exception{
 		final int pLen = pattern.length();
-		String s = "$"; // initialized to dummy char that will be removed later
+		String alignment = "$"; // initialized to dummy char that will be removed later
 		char newChar = 0;
 		assert(numBytesRead >= pLen) : "Pattern too large for file.";
 
 		// initialize s
-		for(int i =0; s.length() < pLen; ++i) {
-			s += (char)b[i];
+		for(int i =0; alignment.length() < pLen; ++i) {
+			alignment += (char)b[i];
 		}
 		
 		//if(DEBUG) System.out.println("s:    \"" + s + '"');
@@ -156,11 +156,11 @@ public class strMatch{
 				"Text contains characters with ascii values > 127."+(int)newChar;
 			newChar = (char)b[i];
 			//if(DEBUG) System.out.println("newChar:    \"" + newChar + '"');
-			s += newChar;		// update substrings
-			s = s.substring(1, pLen+1);
-			if(DEBUG) System.out.println("s:    \"" + s + '"');
+			alignment += newChar;		// update substrings
+			alignment = alignment.substring(1, pLen+1);
+			if(DEBUG) System.out.println("s:    \"" + alignment + '"');
 			for(int j = 0; j < pLen; ++j){
-				if(s.charAt(j) != pattern.charAt(j) )
+				if(alignment.charAt(j) != pattern.charAt(j) )
 					break;		// don't check rest of string
 				if(j == pLen-1 )		// all chars matched
 					return true;
