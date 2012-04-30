@@ -15,6 +15,8 @@ Total time 11 hrs, 8 hrs of pair programing
 NOTES:
 run with: source runTest.sh
 time grep -m 1 '78:25 Man did eat angels' bible.txt
+
+turnin --submit sarat project3 strMatch.java emails.txt readme.txt report.pdf
 issues:
 	- case: when pattern is longer than chunk size
 	- BM
@@ -47,14 +49,14 @@ public class strMatch{
 
 	public static void main(String[] args) throws Exception
 	{   
-		long endTime, elapsedTime, startTime = System.currentTimeMillis();
+		double endTime, elapsedTime, startTime = System.currentTimeMillis();
 		boolean[] results = new boolean[4];
 		
 		try {
 			patternFile = new File(args[0]);
 			sourceFile = new File(args[1]);
 			outFile = new File(args[2]);
-			if(DEBUG) System.out.println("sourceFile.length(): " + sourceFile.length());
+			//if(DEBUG) System.out.println("sourceFile.length(): " + sourceFile.length());
 			out = new PrintWriter(new FileWriter(outFile));
 
 			// input patterns
@@ -70,10 +72,10 @@ public class strMatch{
 				
 				// run algorithms
 				int rLen = 0;
-				results[rLen] = output(Algorithm.BF, pattern); ++rLen;
+//				results[rLen] = output(Algorithm.BF, pattern); ++rLen;
 				results[rLen] = output(Algorithm.RK, pattern); ++rLen;
 				results[rLen] = output(Algorithm.KMP, pattern); ++rLen;
-//				results[rLen] = output(Algorithm.BM, pattern); ++rLen;
+				results[rLen] = output(Algorithm.BM, pattern); ++rLen;
 				
 				// check that all algorithms returned same result
 				boolean sameValue = true;
@@ -88,13 +90,14 @@ public class strMatch{
 			
 			endTime = System.currentTimeMillis();
 			elapsedTime = endTime - startTime;
-			if(TIME) System.out.println("main() elapsedTime: " + elapsedTime + " ms");
+			elapsedTime /= 1000.0;	// convert from ms to seconds
+			if(TIME) System.out.println("main() elapsedTime: " + elapsedTime + " sec");
 		}
 	}
 
 	static boolean output(Algorithm alg, String pattern) throws Exception{
 		boolean found = false;
-		long end, elapsed, start = System.currentTimeMillis();
+		double end, elapsed, start = System.currentTimeMillis();
 		//we need to reset the bytes read in for each call.
 		sourceInputStream = new DataInputStream(new FileInputStream(sourceFile) );
 		readBytes();
@@ -114,11 +117,13 @@ public class strMatch{
 			found = BM(pattern);
 
 		String result = found ? "MATCHED" : "FAILED";
-		System.out.println(alg.str + " " + result + ": " + pattern);
+		if(DEBUG)System.out.println(alg.str + " " + result + ": " + pattern);
+		out.println(alg.str + " " + result + ": " + pattern);
 
 		end = System.currentTimeMillis();
-		elapsed = end - start;
-		if(TIME) System.out.println(alg.str + " elapsed: " + elapsed + " ms");
+		elapsed = (end - start);
+		elapsed /= 1000;		// convert from ms to seconds
+		if(TIME) System.out.println(alg.str + " elapsed: " + elapsed + " sec");
 		
 		return found;
 	}

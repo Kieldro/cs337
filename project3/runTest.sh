@@ -1,6 +1,6 @@
 # file variables
-pattern="biblePattern.txt"
-source="bible.txt"
+pattern="samplePattern.txt"
+source="sampleSource.txt"
 outFile="results.txt"
 compile=true
 grep=true
