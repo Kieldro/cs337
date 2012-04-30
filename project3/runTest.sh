@@ -13,6 +13,7 @@ if $compile; then
 fi
 
 if $noError; then		# don't exectute if there were compilation errors
+	echo COMPILED successfully.
 	echo EXECTUTING...
 	java -ea strMatch $pattern $source $outFile
 fi

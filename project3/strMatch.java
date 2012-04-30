@@ -25,6 +25,7 @@ import java.util.*;		// for scanner
 
 public class strMatch{
 	final static boolean DEBUG = true;
+	final static boolean TIME = false;		// set to true for performance info
 	static File patternFile;
 	static File sourceFile;
 	static DataInputStream sourceInputStream;
@@ -80,7 +81,7 @@ public class strMatch{
 			
 			endTime = System.currentTimeMillis();
 			elapsedTime = endTime - startTime;
-			System.out.println("main() elapsedTime: " + elapsedTime + " ms");
+			if(TIME) System.out.println("main() elapsedTime: " + elapsedTime + " ms");
 		}
 	}
 
@@ -88,8 +89,7 @@ public class strMatch{
 		boolean found = false;
 		long end, elapsed, start = System.currentTimeMillis();
 		//we need to reset the bytes read in for each call.
-		FileInputStream sif = new FileInputStream(sourceFile);
-		sourceInputStream = new DataInputStream(sif);
+		sourceInputStream = new DataInputStream(new FileInputStream(sourceFile) );
 		readBytes();
 		//if(DEBUG) System.out.println("b:         \"" + new String(b) + '"');
 
@@ -111,7 +111,7 @@ public class strMatch{
 
 		end = System.currentTimeMillis();
 		elapsed = end - start;
-		System.out.println(alg.str + " elapsed: " + elapsed + " ms");
+		if(TIME) System.out.println(alg.str + " elapsed: " + elapsed + " ms");
 	}
 
 	static boolean readBytes() throws Exception {
@@ -188,7 +188,7 @@ public class strMatch{
 		int patternHash = hashFunc ? hash(pattern): hashBase(pattern);
 		int alignHash = hashFunc ? hash(alignment): hashBase(alignment);
 
-		for(int i = P_LEN; i < numBytesRead; ++i){
+		for(int i = P_LEN-1; i < numBytesRead; ++i){
 			if (b[i]==0)		// safe to assume?
 				break; //FRONTGUARD
 
@@ -258,17 +258,6 @@ public class strMatch{
 		result += newChar;
 
 		return result;
-	}
-	
-	public static long exponentiation(long a, long b, long n){
-		long c = 1;
-		while(b > 0){
-			if(b % 2 == 1)
-				c = ((c*a) % n);
-			a = (a*a) % n;
-			b = b / 2;
-		}
-		return c % n;
 	}
 
 	public static int[] computeCores(String pattern) {
