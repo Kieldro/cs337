@@ -27,7 +27,7 @@ public class strMatch{
 	static DataInputStream sourceInputStream;
 	static File outFile;
 	static PrintWriter out = null;
-	static final int TWENTYFIVE_MiB = 25 * (int)Math.pow(2, 10);
+	static final int TWENTYFIVE_MiB = 25 * 1000;//(int)Math.pow(2, 20);
 	static byte[] b = new byte[TWENTYFIVE_MiB];
 	static int numBytesRead; //tells us how far to read into the byte array.
 
@@ -54,17 +54,15 @@ public class strMatch{
 			boolean found = false;
 			String result = "";
 
-			//read up to first 25 mb into b
 
 
 			// input
 			Scanner sc = new Scanner(patternFile);
-			sc.useDelimiter("(&\n&)|&");
+			sc.useDelimiter("&(\n&)?");
 
 			while(sc.hasNext() ){		// run for each pattern
-				FileInputStream sif = new FileInputStream(sourceFile); //we need to reset the bytes read in for each call.
-				sourceInputStream = new DataInputStream(sif);
-				readBytes();
+				//read up to first 25 mb into b
+				//if(DEBUG) System.out.println("b.length = " + b.length);
 			
 				// find pattern
 				String pattern = sc.next();
@@ -72,8 +70,8 @@ public class strMatch{
 
 				output(Algorithm.BF, pattern);
 				output(Algorithm.RK, pattern);
-	//			output(Algorithm.KMP, pattern);
-	//			output(Algorithm.BM, pattern);
+				output(Algorithm.KMP, pattern);
+//				output(Algorithm.BM, pattern);
 			}
 		}finally {
 			out.close();
@@ -110,6 +108,10 @@ public class strMatch{
 	static void output(Algorithm alg, String pattern) throws Exception{
 		boolean found = false;
 		long end, elapsed, start = System.currentTimeMillis();
+		//we need to reset the bytes read in for each call.
+		FileInputStream sif = new FileInputStream(sourceFile);
+		sourceInputStream = new DataInputStream(sif);
+		readBytes();
 
 		if(pattern.length() == 0)		// empty string pattern
 			found = true;
@@ -146,10 +148,10 @@ public class strMatch{
 			s += (char)b[z];
 			z++;
 		}
-
+	
+		
+		assert(b.length > 0): "Char array b is empty";
 		for(int i = pLen; i < numBytesRead; ++i){
-			if (b[i]==0)
-				break; //FRONTGUARD
 			//if(DEBUG) System.out.println("s:    \"" + s + '"');
 			newChar = (char)b[i];
 			s += newChar;		// update substrings
@@ -161,7 +163,7 @@ public class strMatch{
 					return true;
 			}
 
-			if ((i==numBytesRead-1) && readBytes()) //BACKGUARD
+			if ((i==numBytesRead-1) && readBytes() ) //BACKGUARD
 				i=-1;
 		}
 
