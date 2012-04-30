@@ -14,8 +14,11 @@ Total time 11 hrs, 8 hrs of pair programing
 
 NOTES:
 run with: source runTest.sh
-time grep Project GutenBerg sampleSource.txt = 29.039 s
-
+time grep -m 1 '78:25 Man did eat angels' bible.txt
+issues:
+	- new line case
+	- 2 empty patterns
+	- BM
 */
 import java.io.*;		// for File
 import java.util.*;		// for scanner
@@ -50,18 +53,17 @@ public class strMatch{
 			sourceFile = new File(args[1]);
 
 			outFile = new File(args[2]);
+			if(DEBUG) System.out.println("sourceFile.length(): " + sourceFile.length());
+			
 			out = new PrintWriter(new FileWriter(outFile));
 			boolean found = false;
 			String result = "";
 
-
-
-			// input
+			// input patterns
 			Scanner sc = new Scanner(patternFile);
-			sc.useDelimiter("&(\n&)?");
+			sc.useDelimiter("&(\n&)?(\n)?");
 
 			while(sc.hasNext() ){		// run for each pattern
-				//read up to first 25 mb into b
 				//if(DEBUG) System.out.println("b.length = " + b.length);
 			
 				// find pattern
@@ -69,8 +71,8 @@ public class strMatch{
 				if(DEBUG) System.out.println("pattern: \"" + pattern + '"');
 
 				output(Algorithm.BF, pattern);
-				output(Algorithm.RK, pattern);
-				output(Algorithm.KMP, pattern);
+	//			output(Algorithm.RK, pattern);
+//				output(Algorithm.KMP, pattern);
 //				output(Algorithm.BM, pattern);
 			}
 		}finally {
@@ -139,23 +141,24 @@ public class strMatch{
 		final int pLen = pattern.length();
 		String s = "$"; // initialized to dummy char that will be removed later
 		char newChar = 0;
-		//if(DEBUG) System.out.println("newChar:    \"" + newChar + '"');
 		assert(numBytesRead >= pLen) : "Pattern too large for file.";
 
 		// initialize s
-		int z =0;
-		while(s.length() < pLen) {
-			s += (char)b[z];
-			z++;
+		for(int i =0; s.length() < pLen; ++i) {
+			s += (char)b[i];
 		}
-	
 		
+		//if(DEBUG) System.out.println("s:    \"" + s + '"');
+		//if(DEBUG) System.out.println("b: \"" + new String(b) + '"');
 		assert(b.length > 0): "Char array b is empty";
 		for(int i = pLen; i < numBytesRead; ++i){
-			//if(DEBUG) System.out.println("s:    \"" + s + '"');
+			assert(newChar <= 127):
+				"Text contains characters with ascii values > 127."+(int)newChar;
 			newChar = (char)b[i];
+			//if(DEBUG) System.out.println("newChar:    \"" + newChar + '"');
 			s += newChar;		// update substrings
 			s = s.substring(1, pLen+1);
+			if(DEBUG) System.out.println("s:    \"" + s + '"');
 			for(int j = 0; j < pLen; ++j){
 				if(s.charAt(j) != pattern.charAt(j) )
 					break;		// don't check rest of string
@@ -234,7 +237,8 @@ public class strMatch{
 
 		result -= s.charAt(0);
 		result += newChar;
-
+		//result %= 257;
+		
 		return result;
 	}
 
@@ -245,7 +249,7 @@ public class strMatch{
 		for(int i = 0; i < s.length(); ++i)
 			result += s.charAt(i) * Math.pow(256, s.length()-i );
 
-		result %= 7;		// mod by prime to reduce hash buckets
+		result %= 257;		// mod by prime to reduce hash buckets
 		return result;
 	}
 
@@ -269,14 +273,6 @@ public class strMatch{
 			b = b / 2;
 		}
 		return c % n;
-	}
-
-	// Returns true if x is prime.
-	public static boolean isPrime(long x){
-		if(x % 2 == 0) return false;
-		for(int i = 3; i*i <= x; i += 2)
-			if(x%i == 0) return false;
-		return true;
 	}
 
 	public static int[] computeCores(String pattern) {
@@ -304,6 +300,7 @@ public class strMatch{
 		return f;
 	}
 
+	// Knuth-Morris-Pratt
 	public static boolean KMP(String p) throws Exception{
 		final int pLen = p.length();
 		int[] a = computeCores(p);
@@ -336,7 +333,6 @@ public class strMatch{
 				s = s.substring(s.length()- a[s.length()-1]);
 			}
 
-
 			if ((i==numBytesRead-1) && readBytes())
 				i=-1;   //this resets us in the for loop.  we set it to -1 b/c ++i will increment it back to 0.
 		}
@@ -344,6 +340,7 @@ public class strMatch{
 		return false;
 	}
 	
+	// bad symbol heuristic
 	static int[] badSymbol(String pattern) {
 		char[] p = pattern.toCharArray();
 		int[] rt = new int[128];
@@ -357,7 +354,8 @@ public class strMatch{
 
 		return rt;
 	}
-
+	
+	// good suffix heuristic
 	static int[] goodSuffix(String pattern, int[] f) {
 		char[] p = pattern.toCharArray();
 		int initVal= p.length - f[p.length];
@@ -381,6 +379,7 @@ public class strMatch{
 		return s;
 	}
 
+	// Boyer-Moore
 	static boolean BM(String pattern) throws Exception{
 		char[] p = pattern.toCharArray();
 		//precomputations
