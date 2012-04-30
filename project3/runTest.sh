@@ -1,14 +1,21 @@
 # file variables
-pattern="Pattern.txt"
-source="Source.txt"
+pattern="biblePattern.txt"
+source="bible.txt"
 outFile="results.txt"
-grep=true
+compile=true
+grep=false
+noError=true
 
-echo COMPILING...
-javac strMatch.java
+if $compile; then
+	echo COMPILING...
+	javac strMatch.java
+	noError=([ $? == 0 ])
+fi
 
-echo EXECTUTING...
-java -ea strMatch $pattern $source $outFile
+if $noError; then		# don't exectute if there were compilation errors
+	echo EXECTUTING...
+	java -ea strMatch $pattern $source $outFile
+fi
 
 if $grep; then
 	echo GREP...

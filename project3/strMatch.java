@@ -16,9 +16,9 @@ NOTES:
 run with: source runTest.sh
 time grep -m 1 '78:25 Man did eat angels' bible.txt
 issues:
-	- new line case
-	- 2 empty patterns
+	- case: when pattern is longer than chunk size
 	- BM
+	- 2 empty patterns
 */
 import java.io.*;		// for File
 import java.util.*;		// for scanner
@@ -30,7 +30,7 @@ public class strMatch{
 	static DataInputStream sourceInputStream;
 	static File outFile;
 	static PrintWriter out = null;
-	static final int TWENTYFIVE_MiB = 25 * 1000;//(int)Math.pow(2, 20);
+	static final int TWENTYFIVE_MiB = 25 *4;//* (int)Math.pow(2, 20);
 	static byte[] b = new byte[TWENTYFIVE_MiB];
 	static int numBytesRead; //tells us how far to read into the byte array.
 
@@ -68,11 +68,11 @@ public class strMatch{
 			
 				// find pattern
 				String pattern = sc.next();
-				if(DEBUG) System.out.println("pattern: \"" + pattern + '"');
+				if(DEBUG) System.out.println("pattern:   \"" + pattern + '"');
 
 				output(Algorithm.BF, pattern);
-	//			output(Algorithm.RK, pattern);
-//				output(Algorithm.KMP, pattern);
+				output(Algorithm.RK, pattern);
+				output(Algorithm.KMP, pattern);
 //				output(Algorithm.BM, pattern);
 			}
 		}finally {
@@ -82,6 +82,36 @@ public class strMatch{
 			elapsedTime = endTime - startTime;
 			System.out.println("main() elapsedTime: " + elapsedTime + " ms");
 		}
+	}
+
+	static void output(Algorithm alg, String pattern) throws Exception{
+		boolean found = false;
+		long end, elapsed, start = System.currentTimeMillis();
+		//we need to reset the bytes read in for each call.
+		FileInputStream sif = new FileInputStream(sourceFile);
+		sourceInputStream = new DataInputStream(sif);
+		readBytes();
+		//if(DEBUG) System.out.println("b:         \"" + new String(b) + '"');
+
+		if(pattern.length() == 0)		// empty string pattern
+			found = true;
+		else if(sourceFile.length() < pattern.length() )		// source text too small
+			found = false;
+		else if(alg == Algorithm.BF )
+			found = BF(pattern);
+		else if(alg == Algorithm.RK)
+			found = RK(pattern);
+		else if(alg == Algorithm.KMP)
+			found = KMP(pattern);
+		else if(alg == Algorithm.BM)
+			found = BM(pattern);
+
+		String result = found ? "PASSED" : "FAILED";
+		System.out.println(alg.str + " " + result + ": " + pattern);
+
+		end = System.currentTimeMillis();
+		elapsed = end - start;
+		System.out.println(alg.str + " elapsed: " + elapsed + " ms");
 	}
 
 	static boolean readBytes() throws Exception {
@@ -107,62 +137,31 @@ public class strMatch{
 		return true;
 	}
 
-	static void output(Algorithm alg, String pattern) throws Exception{
-		boolean found = false;
-		long end, elapsed, start = System.currentTimeMillis();
-		//we need to reset the bytes read in for each call.
-		FileInputStream sif = new FileInputStream(sourceFile);
-		sourceInputStream = new DataInputStream(sif);
-		readBytes();
-
-		if(pattern.length() == 0)		// empty string pattern
-			found = true;
-		else if(sourceFile.length() < pattern.length() )		// source text too small
-			found = false;
-		else if(alg == Algorithm.BF )
-			found = BF(pattern);
-		else if(alg == Algorithm.RK)
-			found = RK(pattern);
-		else if(alg == Algorithm.KMP)
-			found = KMP(pattern);
-		else if(alg == Algorithm.BM)
-			found = BM(pattern);
-
-		String result = found ? "PASSED" : "FAILED";
-		System.out.println(alg.str + " " + result + ": " + pattern);
-
-		end = System.currentTimeMillis();
-		elapsed = end - start;
-		System.out.println(alg.str + " elapsed: " + elapsed + " ms");
-	}
-
 	// Brute Force method
 	public static boolean BF(String pattern) throws Exception{
-		final int pLen = pattern.length();
+		final int P_LEN = pattern.length();
 		String alignment = "$"; // initialized to dummy char that will be removed later
 		char newChar = 0;
-		assert(numBytesRead >= pLen) : "Pattern too large for file.";
+		assert(numBytesRead >= P_LEN) : "Pattern too large for file.";
 
 		// initialize s
-		for(int i =0; alignment.length() < pLen; ++i) {
+		for(int i = 0; alignment.length() < P_LEN; ++i)
 			alignment += (char)b[i];
-		}
 		
-		//if(DEBUG) System.out.println("s:    \"" + s + '"');
-		//if(DEBUG) System.out.println("b: \"" + new String(b) + '"');
+		//if(DEBUG) System.out.println("initalign: \"" + alignment + '"');
 		assert(b.length > 0): "Char array b is empty";
-		for(int i = pLen; i < numBytesRead; ++i){
+		for(int i = P_LEN-1; i < numBytesRead; ++i){
 			assert(newChar <= 127):
-				"Text contains characters with ascii values > 127."+(int)newChar;
+				"Text contains characters with ascii values > 127: "+(int)newChar;
 			newChar = (char)b[i];
-			//if(DEBUG) System.out.println("newChar:    \"" + newChar + '"');
+			//if(DEBUG) System.out.println("newChar:   \"" + newChar + '"');
+			alignment = alignment.substring(1, P_LEN);
 			alignment += newChar;		// update substrings
-			alignment = alignment.substring(1, pLen+1);
-			if(DEBUG) System.out.println("s:    \"" + alignment + '"');
-			for(int j = 0; j < pLen; ++j){
+			//if(DEBUG) System.out.println("alignment: \"" + alignment + '"');
+			for(int j = 0; j < P_LEN; ++j){
 				if(alignment.charAt(j) != pattern.charAt(j) )
 					break;		// don't check rest of string
-				if(j == pLen-1 )		// all chars matched
+				if(j == P_LEN-1 )		// all chars matched
 					return true;
 			}
 
@@ -175,41 +174,37 @@ public class strMatch{
 
 	// Rabin-Karp
 	public static boolean RK(String pattern) throws Exception{
-		final int pLen = pattern.length();
-		boolean hashFunc = true;		// set to true for simple hash function
-		String s = "$"; // initialized to dummy char that will be removed later
-		int patternHash = hashFunc ? hash(pattern): hashBase(pattern);
-		int sHash = 0;
+		final int P_LEN = pattern.length();
+		String alignment = "$"; // initialized to dummy char that will be removed later
 		char newChar = 0;
 		//if(DEBUG) System.out.println("newChar:    \"" + newChar + '"');
 		//if(DEBUG) System.out.println("hash(pattern):    \"" + patternHash + '"');
-		assert(numBytesRead >= pLen) : "Pattern too large for file.";
-
+		assert(numBytesRead >= P_LEN) : "Pattern too large for file.";
 		// initialize s
-		int z=0;
-		while(s.length() < pLen) {
-			s += (char)b[z];
-			z++;
-		}
-		sHash = hashFunc ? hash(s): hashBase(s);
+		for(int i = 0; alignment.length() < P_LEN; ++i)
+			alignment += (char)b[i];
+		
+		boolean hashFunc = true;		// set to true for simple hash function
+		int patternHash = hashFunc ? hash(pattern): hashBase(pattern);
+		int alignHash = hashFunc ? hash(alignment): hashBase(alignment);
 
-		for(int i = pLen; i < numBytesRead; ++i){
-			if (b[i]==0)
+		for(int i = P_LEN; i < numBytesRead; ++i){
+			if (b[i]==0)		// safe to assume?
 				break; //FRONTGUARD
 
 			//if(DEBUG) System.out.println("s:    \"" + s + '"');
 			newChar = (char)b[i];
-			sHash = hash(s, sHash, newChar);		// update hash
-			s += newChar;		// update substrings
-			s = s.substring(1, pLen+1);
+			alignHash = hash(alignment, alignHash, newChar);		// update hash
+			alignment += newChar;
+			alignment = alignment.substring(1, P_LEN+1);
 
-			//if(DEBUG) System.out.println("sHash = " + sHash);
-			if (patternHash == sHash ){
-				//if(DEBUG) System.out.println("hashes matched: " + patternHash + " == " + sHash);
-				for(int j = 0; j < pLen; ++j){
-					if(s.charAt(j) != pattern.charAt(j) )
+			//if(DEBUG) System.out.println("alignHash = " + alignHash);
+			if (patternHash == alignHash ){
+				//if(DEBUG) System.out.println("hashes matched: " + patternHash + " == " + alignHash);
+				for(int j = 0; j < P_LEN; ++j){
+					if(alignment.charAt(j) != pattern.charAt(j) )
 						break;		// don't check rest of string
-					if(j == pLen-1 )		// all chars matched
+					if(j == P_LEN-1 )		// all chars matched
 						return true;
 				}
 			}
@@ -245,11 +240,12 @@ public class strMatch{
 	// initial hash: base 256
 	static int hashBase(String s){
 		int result = 0;
+		int mod = 257;	//31, 127, 518
 
 		for(int i = 0; i < s.length(); ++i)
-			result += s.charAt(i) * Math.pow(256, s.length()-i );
+			result += (s.charAt(i) * Math.pow(256, s.length()-i ) ) % mod;
 
-		result %= 257;		// mod by prime to reduce hash buckets
+		result %= mod;		// mod by prime to reduce hash buckets
 		return result;
 	}
 
@@ -302,12 +298,12 @@ public class strMatch{
 
 	// Knuth-Morris-Pratt
 	public static boolean KMP(String p) throws Exception{
-		final int pLen = p.length();
+		final int P_LEN = p.length();
 		int[] a = computeCores(p);
 		String s = "";
 		char newChar = 0;
 		//if(DEBUG) System.out.println("newChar:    \"" + newChar + '"');
-		assert(numBytesRead >= pLen) : "Pattern too large for file.";
+		assert(numBytesRead >= P_LEN) : "Pattern too large for file.";
 
 		int r =0;
 		for (int i = 0; i < numBytesRead; ++i) {
