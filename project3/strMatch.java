@@ -35,6 +35,7 @@ public class strMatch{
 	static PrintWriter out = null;
 	static final int NUM_BYTES = 25 * (int)Math.pow(2, 20);		// 25 MiB
 	static byte[] b;
+	static int numComparisons;
 	static int numBytesRead; //tells us how far to read into the byte array.
 
 	public static enum Algorithm{
@@ -76,7 +77,7 @@ public class strMatch{
 				results[rLen] = output(Algorithm.BF, pattern); ++rLen;
 				results[rLen] = output(Algorithm.RK, pattern); ++rLen;
 				results[rLen] = output(Algorithm.KMP, pattern); ++rLen;
-//				results[rLen] = output(Algorithm.BM, pattern); ++rLen;
+				results[rLen] = output(Algorithm.BM, pattern); ++rLen;
 				if(DEBUG) System.out.println();
 				
 				// check that all algorithms returned same result
@@ -97,6 +98,7 @@ public class strMatch{
 	}
 
 	static boolean output(Algorithm alg, String pattern) throws Exception{
+		numComparisons =0;
 		boolean found = false;
 		double end, elapsed, start = System.currentTimeMillis();
 		//we need to reset the bytes read in for each call.
@@ -116,7 +118,7 @@ public class strMatch{
 			found = KMP(pattern);
 		else if(alg == Algorithm.BM)
 			found = BM(pattern);
-
+		System.out.println("numComparisons: " + numComparisons);
 		String result = found ? "MATCHED" : "FAILED";
 		if(DEBUG)System.out.println(alg.str + " " + result + ": " + pattern);
 		out.println(alg.str + " " + result + ": " + pattern);
@@ -308,7 +310,8 @@ public class strMatch{
 		return f;
 	}
 
-	// Knuth-Morris-Pratt
+
+	// public static boolean KMP(String pattern) throws Exception{
 	public static boolean KMP(String pattern) throws Exception{
 		final int P_LEN = pattern.length();
 		int[] a = computeCores(pattern);
@@ -316,37 +319,42 @@ public class strMatch{
 		char newChar = 0;
 		//if(DEBUG) System.out.println("newChar:    \"" + newChar + '"');
 		assert(numBytesRead >= P_LEN) : "Pattern too large for file.";
-
+	
 		int r =0;
 		for (int i = 0; i < numBytesRead; ++i) {
 			if (b[i]==0)
 				break;
-
+	
 			newChar = (char) b[i];
 			alignment.append(newChar);
 			// System.out.println("i: " + i + "    alignment: " + alignment);
 			if (r == P_LEN-1 && alignment.charAt(r) == pattern.charAt(r) ){
 				return true;
 			}
-
+	
 			if (alignment.charAt(r) == pattern.charAt(r) ) {
 				r++;
+				numComparisons++;
 			}
 			else if (r == 0) {
+				numComparisons++;
 				alignment = new StringBuilder();
 			}
 			else if (r > 0) {
+				numComparisons++;
 				r = a[alignment.length()-1];
 				alignment.deleteCharAt(0);
 			}
-
+	
 			if ((i == numBytesRead-1) && readBytes() )
 				i =- 1;   //this resets us in the for loop.  we set it to -1 b/c ++i will increment it back to 0.
 		}
-
+	
 		return false;
 	}
 	
+	
+
 	// bad symbol heuristic
 	static int[] badSymbol(String pattern) {
 		char[] p = pattern.toCharArray();
@@ -399,12 +407,15 @@ public class strMatch{
 		int old_l=0;
 
 		while (l<=(numBytesRead-p.length)) { //do i need to subtract the length of p??
+		    j=p.length;
 			while (/*(l+j-1) < numBytesRead &&*/ j>0 && p[j-1] == b[l+j-1]) {
+				numComparisons++;
 				j--;
 			}
 			if (j==0)
 				return true;
 			else {
+				numComparisons++;
 				old_l=l;
 				l += Math.max(j-1-rt[(int)b[l+j-1]], s[p.length-j]);
 				//j = p.length;
