@@ -1,0 +1,19 @@
+COMPILING...
+COMPILED successfully.
+EXECTUTING...
+BF, 0.513
+collisions, 8665,RK, 0.572
+KMP, 0.678
+BM, 0.289
+
+BF, 0.171
+collisions, 1628,RK, 0.102
+KMP, 0.521
+BM, 0.086
+
+BF, 0.093
+collisions, 1,RK, 0.069
+KMP, 0.169
+BM, 0.092
+
+main() elapsedTime: 3.536 sec

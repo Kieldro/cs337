@@ -3,7 +3,7 @@ pattern="biblePattern.txt"
 source="bible.txt"
 outFile="results.txt"
 compile=true
-grep=true
+grep=false
 noError=true
 
 if $compile; then

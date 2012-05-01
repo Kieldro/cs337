@@ -34,7 +34,7 @@ public class strMatch{
 	static DataInputStream sourceInputStream;
 	static File outFile;
 	static PrintWriter out = null;
-	static final int NUM_BYTES = 1 * (int)Math.pow(2, 20);		// 25 MiB (mebibytes)
+	static final int NUM_BYTES = 1 * (int)Math.pow(2, 29);		// 25 MiB (mebibytes)
 	static byte[] b;
 	static int numBytesRead; //tells us how far to read into the byte array.
 
@@ -57,7 +57,7 @@ public class strMatch{
 			patternFile = new File(args[0]);
 			sourceFile = new File(args[1]);
 			outFile = new File(args[2]);
-			if(DEBUG) System.out.println("sourceFile.length(): " + (int)sourceFile.length());
+			//if(DEBUG) System.out.println("sourceFile.length(): " + (int)sourceFile.length());
 			out = new PrintWriter(new FileWriter(outFile));
 			b = new byte[NUM_BYTES];//(int)sourceFile.length()];
 
@@ -70,7 +70,7 @@ public class strMatch{
 			
 				// find pattern
 				String pattern = sc.next();
-				if(DEBUG) System.out.println("pattern:   \"" + pattern + '"');
+				//if(DEBUG) System.out.println("pattern:   \"" + pattern + '"');
 				
 				// run algorithms
 				int rLen = 0;
@@ -78,6 +78,7 @@ public class strMatch{
 				results[rLen] = output(Algorithm.RK, pattern); ++rLen;
 				results[rLen] = output(Algorithm.KMP, pattern); ++rLen;
 				results[rLen] = output(Algorithm.BM, pattern); ++rLen;
+				if(DEBUG) System.out.println();
 				
 				// check that all algorithms returned same result
 				boolean sameValue = true;
@@ -87,7 +88,6 @@ public class strMatch{
 					"Algorithms returning different results for pattern: " + pattern;
 			}
 		}finally {
-			
 			out.close();
 			
 			endTime = System.currentTimeMillis();
@@ -119,13 +119,13 @@ public class strMatch{
 			found = BM(pattern);
 
 		String result = found ? "MATCHED" : "FAILED";
-		if(DEBUG)System.out.println(alg.str + " " + result + ": " + pattern);
+		//if(DEBUG)System.out.println(alg.str + " " + result + ": " + pattern);
 		out.println(alg.str + " " + result + ": " + pattern);
 
 		end = System.currentTimeMillis();
 		elapsed = (end - start);
 		elapsed /= 1000;		// convert from ms to seconds
-		if(TIME) System.out.println(alg.str + " elapsed: " + elapsed + " sec");
+		if(TIME) System.out.println(alg.str + ", " + elapsed);
 		
 		return found;
 	}
@@ -148,7 +148,7 @@ public class strMatch{
 			//copy in values from passed in array
 			b[i] = c[i];
 		}
-		numBytesRead = sourceInputStream.read(b,offset,NUM_BYTES) + offset;
+		numBytesRead = sourceInputStream.read(b, offset, NUM_BYTES) + offset;
 		if (numBytesRead==-1) //can no longer read any more bytes.  I create a new input stream so that it's ready for the next call and to reset the numBytesRead to a positive value.  	
 			return false;
 		return true;
@@ -239,7 +239,7 @@ public class strMatch{
 				i=-1;
 		}
 
-		if(DEBUG) System.out.println("collisions = " + collisions);
+		if(DEBUG) System.out.println("collisions, " + collisions);
 		return result;
 	}
 
