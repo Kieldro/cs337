@@ -26,7 +26,7 @@ import java.io.*;		// for File
 import java.util.*;		// for scanner
 
 public class strMatch{
-	final static boolean DEBUG = true;
+	final static boolean DEBUG = !true;
 	final static boolean TIME = true;		// set to true for performance info
 	static File patternFile;
 	static File sourceFile;
