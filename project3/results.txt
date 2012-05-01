@@ -1,12 +1,15 @@
-BF FAILED: Richard Dawkins
-RK FAILED: Richard Dawkins
-KMP FAILED: Richard Dawkins
-BM FAILED: Richard Dawkins
-BF MATCHED: 78:25 Man did eat angels
-RK MATCHED: 78:25 Man did eat angels
-KMP MATCHED: 78:25 Man did eat angels
-BM MATCHED: 78:25 Man did eat angels
-BF MATCHED: Project Gutenberg
-RK MATCHED: Project Gutenberg
-KMP MATCHED: Project Gutenberg
-BM MATCHED: Project Gutenberg
+BF MATCHED: The Project Gutenberg EBook of Twelve Years of a Soldier's Life in India, by 
+W. S. R. Hodson
+RK MATCHED: The Project Gutenberg EBook of Twelve Years of a Soldier's Life in India, by 
+W. S. R. Hodson
+KMP MATCHED: The Project Gutenberg EBook of Twelve Years of a Soldier's Life in India, by 
+W. S. R. Hodson
+BF FAILED: whom t3he
+mutiny
+RK FAILED: whom t3he
+mutiny
+KMP FAILED: whom t3he
+mutiny
+BF FAILED: Can you find ThIs?
+RK FAILED: Can you find ThIs?
+KMP FAILED: Can you find ThIs?

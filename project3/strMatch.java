@@ -20,7 +20,6 @@ time grep -m 1 '78:25 Man did eat angels' bible.txt
 turnin --submit sarat project3 strMatch.java emails.txt readme.txt report.pdf
 issues:
 	- case: when pattern is longer than chunk size
-	- BM
 	- 2 empty patterns
 */
 import java.io.*;		// for File
@@ -34,7 +33,7 @@ public class strMatch{
 	static DataInputStream sourceInputStream;
 	static File outFile;
 	static PrintWriter out = null;
-	static final int NUM_BYTES = 1 * (int)Math.pow(2, 29);		// 25 MiB (mebibytes)
+	static final int NUM_BYTES = (int)(1.1 * Math.pow(2, 30));		// 1.1 GiB (gibibytes)
 	static byte[] b;
 	static int numBytesRead; //tells us how far to read into the byte array.
 
@@ -70,14 +69,14 @@ public class strMatch{
 			
 				// find pattern
 				String pattern = sc.next();
-				//if(DEBUG) System.out.println("pattern:   \"" + pattern + '"');
+				if(DEBUG) System.out.println("pattern,   \"" + pattern + '"');
 				
 				// run algorithms
 				int rLen = 0;
 				results[rLen] = output(Algorithm.BF, pattern); ++rLen;
 				results[rLen] = output(Algorithm.RK, pattern); ++rLen;
 				results[rLen] = output(Algorithm.KMP, pattern); ++rLen;
-				results[rLen] = output(Algorithm.BM, pattern); ++rLen;
+//				results[rLen] = output(Algorithm.BM, pattern); ++rLen;
 				if(DEBUG) System.out.println();
 				
 				// check that all algorithms returned same result
@@ -119,13 +118,13 @@ public class strMatch{
 			found = BM(pattern);
 
 		String result = found ? "MATCHED" : "FAILED";
-		//if(DEBUG)System.out.println(alg.str + " " + result + ": " + pattern);
+		if(DEBUG)System.out.println(alg.str + " " + result + ": " + pattern);
 		out.println(alg.str + " " + result + ": " + pattern);
 
 		end = System.currentTimeMillis();
 		elapsed = (end - start);
 		elapsed /= 1000;		// convert from ms to seconds
-		if(TIME) System.out.println(alg.str + ", " + elapsed);
+		if(TIME) System.out.println(alg.str + ", " + elapsed + ", sec");
 		
 		return found;
 	}
@@ -206,18 +205,15 @@ public class strMatch{
 			alignment.append((char)b[i]);
 		
 		boolean hashFunc = true;		// set to true for simple hash function
-		int patternHash = hashFunc ? hash(new StringBuilder(pattern) ): hashBase(new StringBuilder(pattern) );
-		int alignHash = hashFunc ? hash(alignment): hashBase(alignment);
+		int patternHash = hash(new StringBuilder(pattern) );
+		int alignHash = hash(alignment);
 		
 		outLoop:
 		for(int i = P_LEN-1; i < numBytesRead; ++i){
-			if (b[i]==0)		// safe to assume?
-				break; //FRONTGUARD
 
 			//if(DEBUG) System.out.println("s:    \"" + s + '"');
 			newChar = (char)b[i];
-			alignHash = hashFunc ? hash(alignment, alignHash, newChar):
-								hashBase(alignment, alignHash, newChar);		// update hash
+			alignHash = hash(alignment, alignHash, newChar);
 			alignment.deleteCharAt(0);
 			alignment.append(newChar);
 
@@ -239,7 +235,7 @@ public class strMatch{
 				i=-1;
 		}
 
-		if(DEBUG) System.out.println("collisions, " + collisions);
+		if(DEBUG) System.out.println("RK, collisions, " + collisions);
 		return result;
 	}
 
@@ -395,10 +391,8 @@ public class strMatch{
 		char[] p = pattern.toCharArray();
 		//precomputations
 		int[] rt = badSymbol(pattern);
-		int[] f = computeCores(pattern);//1-indexed
+		int[] f = computeCores(pattern);		//1-indexed
 		int[] s = goodSuffix (pattern, f);
-
-		//SUFFIX ARRAY NEEDED
 
 		int j = p.length;
 		int l = 0;
@@ -413,7 +407,7 @@ public class strMatch{
 			else {
 				old_l=l;
 				l += Math.max(j-1-rt[(int)b[l+j-1]], s[p.length-j]);
-				j = p.length;			
+				//j = p.length;
 			}
 
 			//the following is our guard for reading in more bytes. It's complicated by the fact 

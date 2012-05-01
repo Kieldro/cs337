@@ -1,9 +1,9 @@
 # file variables
-pattern="biblePattern.txt"
-source="bible.txt"
+pattern="samplePattern.txt"
+source="sampleSource.txt"
 outFile="results.txt"
 compile=true
-grep=false
+grep=true
 noError=true
 
 if $compile; then
@@ -20,5 +20,5 @@ fi
 
 if $grep; then
 	echo GREP for string in $source...
-	time grep -nm 1 '78:25 Man did eat angels' $source
+	time grep -nm 1 'Can you find ThIs?' $source
 fi
