@@ -178,6 +178,7 @@ public class strMatch{
 			alignment.append(newChar);		// StringBuidler
 			//if(DEBUG) System.out.println("alignment: \"" + alignment + '"');
 			for(int j = 0; j < P_LEN; ++j){
+				++numComparisons;
 				if(alignment.charAt(j) != pattern.charAt(j) )
 					break;		// don't check rest of string
 				if(j == P_LEN-1 ){		// all chars matched
@@ -216,12 +217,13 @@ public class strMatch{
 			alignHash = hash(alignment, alignHash, newChar);
 			alignment.deleteCharAt(0);
 			alignment.append(newChar);
-
+			
 			//if(DEBUG) System.out.println("alignHash = " + alignHash);
 			if (patternHash == alignHash ){
 				++collisions;
 				//if(DEBUG) System.out.println("hashes matched: " + patternHash + " == " + alignHash);
 				for(int j = 0; j < P_LEN; ++j){
+					++numComparisons;
 					if(alignment.charAt(j) != pattern.charAt(j) )
 						break;		// don't check rest of string
 					if(j == P_LEN-1 ){		// all chars matched
