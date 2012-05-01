@@ -9,8 +9,9 @@ Pair programming log (> 90% paired)
 4/16 1 - 3p  Ian 2 hrs
 4/17 1 - 3p  Ian, John 4 hr
 4/20 10 - 11a Ian 1 hr
+4/21 1 - 11p  Ian, John 20 hrs
 
-Total time 11 hrs, 8 hrs of pair programing
+Total time 31 hrs, 28 hrs of pair programing
 
 NOTES:
 run with: source runTest.sh
@@ -33,8 +34,8 @@ public class strMatch{
 	static DataInputStream sourceInputStream;
 	static File outFile;
 	static PrintWriter out = null;
-	static final int NUM_BYTES = 25 * (int)Math.pow(2, 20);		// 25 MiB (mebibytes)
-	static byte[] b = new byte[NUM_BYTES];
+	static final int NUM_BYTES = 1 * (int)Math.pow(2, 20);		// 25 MiB (mebibytes)
+	static byte[] b;
 	static int numBytesRead; //tells us how far to read into the byte array.
 
 	public static enum Algorithm{
@@ -56,8 +57,9 @@ public class strMatch{
 			patternFile = new File(args[0]);
 			sourceFile = new File(args[1]);
 			outFile = new File(args[2]);
-			//if(DEBUG) System.out.println("sourceFile.length(): " + sourceFile.length());
+			if(DEBUG) System.out.println("sourceFile.length(): " + (int)sourceFile.length());
 			out = new PrintWriter(new FileWriter(outFile));
+			b = new byte[NUM_BYTES];//(int)sourceFile.length()];
 
 			// input patterns
 			Scanner sc = new Scanner(patternFile);
@@ -72,7 +74,7 @@ public class strMatch{
 				
 				// run algorithms
 				int rLen = 0;
-//				results[rLen] = output(Algorithm.BF, pattern); ++rLen;
+				results[rLen] = output(Algorithm.BF, pattern); ++rLen;
 				results[rLen] = output(Algorithm.RK, pattern); ++rLen;
 				results[rLen] = output(Algorithm.KMP, pattern); ++rLen;
 				results[rLen] = output(Algorithm.BM, pattern); ++rLen;
@@ -90,7 +92,7 @@ public class strMatch{
 			
 			endTime = System.currentTimeMillis();
 			elapsedTime = endTime - startTime;
-			elapsedTime /= 1000.0;	// convert from ms to seconds
+			elapsedTime /= 1000;	// convert from ms to seconds
 			if(TIME) System.out.println("main() elapsedTime: " + elapsedTime + " sec");
 		}
 	}
@@ -157,6 +159,7 @@ public class strMatch{
 		final int P_LEN = pattern.length();
 		StringBuilder alignment = new StringBuilder("$"); // initialized to dummy char that will be removed later
 		char newChar = 0;
+		long collisions = 0;
 		assert(numBytesRead >= P_LEN) : "Pattern too large for file.";
 
 		// initialize s
@@ -176,8 +179,9 @@ public class strMatch{
 			for(int j = 0; j < P_LEN; ++j){
 				if(alignment.charAt(j) != pattern.charAt(j) )
 					break;		// don't check rest of string
-				if(j == P_LEN-1 )		// all chars matched
+				if(j == P_LEN-1 ){		// all chars matched
 					return true;
+				}
 			}
 
 			if ((i==numBytesRead-1) && readBytes() ) //BACKGUARD
@@ -192,6 +196,8 @@ public class strMatch{
 		final int P_LEN = pattern.length();
 		StringBuilder alignment = new StringBuilder("$"); // initialized to dummy char that will be removed later
 		char newChar = 0;
+		long collisions = 0;
+		boolean result = false;
 		//if(DEBUG) System.out.println("newChar:    \"" + newChar + '"');
 		//if(DEBUG) System.out.println("hash(pattern):    \"" + patternHash + '"');
 		assert(numBytesRead >= P_LEN) : "Pattern too large for file.";
@@ -202,7 +208,8 @@ public class strMatch{
 		boolean hashFunc = true;		// set to true for simple hash function
 		int patternHash = hashFunc ? hash(new StringBuilder(pattern) ): hashBase(new StringBuilder(pattern) );
 		int alignHash = hashFunc ? hash(alignment): hashBase(alignment);
-
+		
+		outLoop:
 		for(int i = P_LEN-1; i < numBytesRead; ++i){
 			if (b[i]==0)		// safe to assume?
 				break; //FRONTGUARD
@@ -216,12 +223,15 @@ public class strMatch{
 
 			//if(DEBUG) System.out.println("alignHash = " + alignHash);
 			if (patternHash == alignHash ){
+				++collisions;
 				//if(DEBUG) System.out.println("hashes matched: " + patternHash + " == " + alignHash);
 				for(int j = 0; j < P_LEN; ++j){
 					if(alignment.charAt(j) != pattern.charAt(j) )
 						break;		// don't check rest of string
-					if(j == P_LEN-1 )		// all chars matched
-						return true;
+					if(j == P_LEN-1 ){		// all chars matched
+						result = true;
+						break outLoop;
+					}
 				}
 			}
 		
@@ -229,13 +239,14 @@ public class strMatch{
 				i=-1;
 		}
 
-		return false;
+		if(DEBUG) System.out.println("collisions = " + collisions);
+		return result;
 	}
 
 	// initial hash: using simple algorithm.
 	static int hash(StringBuilder s){
 		int result = 0;
-
+		
 		for(int i = 0; i < s.length(); ++i)
 			result += s.charAt(i);
 
@@ -313,29 +324,28 @@ public class strMatch{
 		int r =0;
 		for (int i = 0; i < numBytesRead; ++i) {
 			if (b[i]==0)
-				break;  //we add this guard.  it tells us that no byte has been read into this location, and so we are done with the array.
-
+				break;
 
 			newChar = (char) b[i];
 			alignment.append(newChar);
 			// System.out.println("i: " + i + "    alignment: " + alignment);
-			if (alignment.charAt(r) == pattern.charAt(r) && r == P_LEN-1){
+			if (r == P_LEN-1 && alignment.charAt(r) == pattern.charAt(r) ){
 				return true;
 			}
 
 			if (alignment.charAt(r) == pattern.charAt(r) ) {
 				r++;
 			}
-			else if (alignment.charAt(r) != pattern.charAt(r) && (r==0) ) {
+			else if (r == 0) {
 				alignment = new StringBuilder();
 			}
-			else if (alignment.charAt(r) != pattern.charAt(r) && r>0) {
-				r=a[alignment.length()-1];
+			else if (r > 0) {
+				r = a[alignment.length()-1];
 				alignment.deleteCharAt(0);
 			}
 
-			if ((i==numBytesRead-1) && readBytes())
-				i=-1;   //this resets us in the for loop.  we set it to -1 b/c ++i will increment it back to 0.
+			if ((i == numBytesRead-1) && readBytes() )
+				i =- 1;   //this resets us in the for loop.  we set it to -1 b/c ++i will increment it back to 0.
 		}
 
 		return false;
@@ -402,7 +412,8 @@ public class strMatch{
 				return true;
 			else {
 				old_l=l;
-				l += Math.max(j-1-rt[(int)b[l+j-1]], s[p.length-j]);				
+				l += Math.max(j-1-rt[(int)b[l+j-1]], s[p.length-j]);
+				j = p.length;			
 			}
 
 			//the following is our guard for reading in more bytes. It's complicated by the fact 

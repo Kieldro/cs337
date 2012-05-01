@@ -1,6 +1,12 @@
-RK MATCHED: The search string lies here
-KMP MATCHED: The search string lies here
-BM MATCHED: The search string lies here
-RK FAILED: Can you find ThIs?
-KMP FAILED: Can you find ThIs?
-BM FAILED: Can you find ThIs?
+BF FAILED: Richard Dawkins
+RK FAILED: Richard Dawkins
+KMP FAILED: Richard Dawkins
+BM FAILED: Richard Dawkins
+BF MATCHED: 78:25 Man did eat angels
+RK MATCHED: 78:25 Man did eat angels
+KMP MATCHED: 78:25 Man did eat angels
+BM MATCHED: 78:25 Man did eat angels
+BF MATCHED: Project Gutenberg
+RK MATCHED: Project Gutenberg
+KMP MATCHED: Project Gutenberg
+BM MATCHED: Project Gutenberg
