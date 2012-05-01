@@ -76,7 +76,7 @@ public class strMatch{
 				results[rLen] = output(Algorithm.BF, pattern); ++rLen;
 				results[rLen] = output(Algorithm.RK, pattern); ++rLen;
 				results[rLen] = output(Algorithm.KMP, pattern); ++rLen;
-//				results[rLen] = output(Algorithm.BM, pattern); ++rLen;
+				results[rLen] = output(Algorithm.BM, pattern); ++rLen;
 				if(DEBUG) System.out.println();
 				
 				// check that all algorithms returned same result
@@ -118,7 +118,7 @@ public class strMatch{
 			found = BM(pattern);
 
 		String result = found ? "MATCHED" : "FAILED";
-		if(DEBUG)System.out.println(alg.str + " " + result + ": " + pattern);
+		//if(DEBUG)System.out.println(alg.str + " " + result + ": " + pattern);
 		out.println(alg.str + " " + result + ": " + pattern);
 
 		end = System.currentTimeMillis();
@@ -204,13 +204,11 @@ public class strMatch{
 		for(int i = 0; alignment.length() < P_LEN; ++i)
 			alignment.append((char)b[i]);
 		
-		boolean hashFunc = true;		// set to true for simple hash function
 		int patternHash = hash(new StringBuilder(pattern) );
 		int alignHash = hash(alignment);
 		
 		outLoop:
 		for(int i = P_LEN-1; i < numBytesRead; ++i){
-
 			//if(DEBUG) System.out.println("s:    \"" + s + '"');
 			newChar = (char)b[i];
 			alignHash = hash(alignment, alignHash, newChar);
@@ -266,17 +264,18 @@ public class strMatch{
 		int mod = 257;	//31, 127, 518
 
 		for(int i = 0; i < s.length(); ++i)
-			result += (s.charAt(i) * Math.pow(256, s.length()-i ) ) % mod;
+			result = result + (int)((s.charAt(i) * Math.pow(256, s.length()-i) ) % mod);
 
-		result %= mod;		// mod by prime to reduce hash buckets
+		//result %= mod;		// mod by prime to reduce hash buckets
 		return result;
 	}
 
 	// update hash
 	static int hashBase(StringBuilder s, int prevHash, char newChar){
 		int result = prevHash;
-
-		result -= s.charAt(0) * Math.pow(256, s.length() );
+		int mod = 257;
+		
+		result -= (s.charAt(0) * Math.pow(256, s.length()) ) % mod;
 		result *= 256;
 		result += newChar;
 
@@ -399,6 +398,7 @@ public class strMatch{
 		int old_l=0;
 
 		while (l<=(numBytesRead-p.length)) { //do i need to subtract the length of p??
+			j = p.length;
 			while (/*(l+j-1) < numBytesRead &&*/ j>0 && p[j-1] == b[l+j-1]) {
 				j--;
 			}
@@ -407,7 +407,6 @@ public class strMatch{
 			else {
 				old_l=l;
 				l += Math.max(j-1-rt[(int)b[l+j-1]], s[p.length-j]);
-				//j = p.length;
 			}
 
 			//the following is our guard for reading in more bytes. It's complicated by the fact 

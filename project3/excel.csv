@@ -1,19 +1,26 @@
 COMPILING...
 COMPILED successfully.
 EXECTUTING...
-BF, 0.513
-collisions, 8665,RK, 0.572
-KMP, 0.678
-BM, 0.289
+pattern,   "Project Gutenberg"
+BF, 0.011, sec
+RK, collisions, 1
+RK, 0.011, sec
+KMP, 0.01, sec
+BM, 0.011, sec
 
-BF, 0.171
-collisions, 1628,RK, 0.102
-KMP, 0.521
-BM, 0.086
+pattern,   "78:25 Man did eat angels"
+BF, 0.056, sec
+RK, collisions, 1628
+RK, 0.049, sec
+KMP, 0.09, sec
+BM, 0.025, sec
 
-BF, 0.093
-collisions, 1,RK, 0.069
-KMP, 0.169
-BM, 0.092
+pattern,   "Richard Dawkins"
+BF, 0.083, sec
+RK, collisions, 8665
+RK, 0.098, sec
+KMP, 0.14, sec
+BM, 0.013, sec
 
-main() elapsedTime: 3.536 sec
+main() elapsedTime: 0.624 sec
+GREP for string in bible.txt...
