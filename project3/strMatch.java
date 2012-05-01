@@ -33,7 +33,7 @@ public class strMatch{
 	static DataInputStream sourceInputStream;
 	static File outFile;
 	static PrintWriter out = null;
-	static final int NUM_BYTES = (int)(1.1 * Math.pow(2, 30));		// 1.1 GiB (gibibytes)
+	static final int NUM_BYTES = 25 * (int)Math.pow(2, 20);		// 25 MiB
 	static byte[] b;
 	static int numBytesRead; //tells us how far to read into the byte array.
 
